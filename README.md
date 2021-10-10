@@ -18,14 +18,14 @@ Supported tools:
 To use the `XSTooling` library in a SwiftPM project, add the following line to the dependencies in your `Package.swift` file:
 
 ```swift
-.package(url: "https://github.com/apple/swift-algorithms", from: "1.0.0"),
+.package(url: "https://github.com/Alexander-Ignition/XSTooling", from: "0.0.1"),
 ```
 
 Include `"XSTooling"` as a dependency for your executable target:
 
 ```swift
 .target(name: "<target>", dependencies: [
-    .product(name: "Algorithms", package: "swift-algorithms"),
+    "XSTooling",
 ]),
 ```
 
