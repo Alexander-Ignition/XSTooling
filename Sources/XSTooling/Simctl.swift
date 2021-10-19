@@ -188,7 +188,7 @@ extension Simctl {
         public let logPath: String
         public let udid: String
         public let isAvailable: Bool
-        public let deviceTypeIdentifier: String
+        public let deviceTypeIdentifier: String?
         public let state: State
         public let name: String
     }
