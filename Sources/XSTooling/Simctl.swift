@@ -161,7 +161,7 @@ extension Simctl {
         }
 
         public var booted: [DeviceInfo] {
-            devices(where: { $0.state == .booted })
+            devices(where: { $0.state == "Booted" })
         }
 
         public func devices(where predicate: (DeviceInfo) -> Bool) -> [DeviceInfo] {
@@ -179,17 +179,12 @@ extension Simctl {
     }
 
     public struct DeviceInfo: Codable, Equatable {
-        public enum State: String, Codable {
-            case shutdown = "Shutdown"
-            case booted = "Booted"
-            case unavailable = "(unavailable)"
-        }
         public let dataPath: String
         public let logPath: String
         public let udid: String
         public let isAvailable: Bool
         public let deviceTypeIdentifier: String?
-        public let state: State
+        public let state: String
         public let name: String
     }
 
