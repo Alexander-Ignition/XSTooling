@@ -29,7 +29,7 @@
  */
 import XSTooling
 
-let shell = Shell()
+let shell = Shell.sh
 
 let path = try shell("pwd").string
 let files = try shell("ls").string.split(separator: "\n")
