@@ -9,7 +9,7 @@ final class KernelTests: XCTestCase {
     }
 
     func testError() {
-        let shell = Shell()
+        let shell = Shell.sh
         XCTAssertThrowsError(try shell.execute("xzrun"))
     }
 }
