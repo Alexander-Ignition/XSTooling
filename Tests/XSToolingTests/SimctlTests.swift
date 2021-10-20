@@ -12,13 +12,13 @@ final class SimctlTests: ToolTestCase {
     // MARK: - Device
 
     func testOpenURL() {
-        XCTAssertNoThrow(try simctl.device("12").open(url: "link"))
-        XCTAssertEqual(commands, ["openurl 12 link"])
+        XCTAssertNoThrow(try simctl.device("0").open(url: "link"))
+        XCTAssertEqual(commands, [["openurl", "0", "link"]])
     }
 
     func testDeviceBoot() {
-        XCTAssertNoThrow(try simctl.device("a").boot())
-        XCTAssertEqual(commands, ["boot a"])
+        XCTAssertNoThrow(try simctl.device("2").boot())
+        XCTAssertEqual(commands, [["boot", "2"]])
     }
 
     // MARK: - App

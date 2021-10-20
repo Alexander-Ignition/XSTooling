@@ -18,7 +18,7 @@ final class XCRunTests: ToolTestCase {
     func testSimctl() throws {
         output = "/text/simctl"
         let simctl = try xcrun.simctl()
-        XCTAssertEqual(commands, ["--find simctl"])
+        XCTAssertEqual(commands, [["--find", "simctl"]])
         XCTAssertEqual(simctl.path, "/text/simctl")
         XCTAssertTrue(xcrun.kernel === kernel)
     }

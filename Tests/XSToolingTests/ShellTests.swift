@@ -18,12 +18,12 @@ final class ShellTests: ToolTestCase {
     func testCallAsFunction() {
         output = "swift/tests/1"
         XCTAssertEqual(try shell("pwd"), "swift/tests/1")
-        XCTAssertEqual(commands, ["pwd"])
+        XCTAssertEqual(commands, [["pwd"]])
     }
 
     func testWhich() {
         output = "/bin/ls"
         XCTAssertEqual(try shell.which("ls"), "/bin/ls")
-        XCTAssertEqual(commands, ["which ls"])
+        XCTAssertEqual(commands, [["which", "ls"]])
     }
 }

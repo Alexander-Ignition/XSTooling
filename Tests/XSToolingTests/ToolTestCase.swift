@@ -5,8 +5,8 @@ class ToolTestCase: XCTestCase {
     /// Tool execution kernel.
     private(set) var kernel: Kernel!
 
-    /// All executed commands.
-    private(set) var commands: [String]!
+    /// All executed commands. Each command is an array of arguments.
+    private(set) var commands: [[String]]!
 
     /// Unique tool path for each test.
     var path: String { name }
@@ -20,8 +20,7 @@ class ToolTestCase: XCTestCase {
         output = ""
         kernel = Kernel { [unowned self] path, arguments in
             XCTAssertEqual(path, self.path)
-            let command = arguments.joined(separator: " ")
-            self.commands.append(command)
+            self.commands.append(arguments)
             return self.output
         }
     }
