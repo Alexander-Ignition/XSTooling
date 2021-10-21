@@ -10,10 +10,19 @@ public struct ProcessOutput: Equatable {
     public init(data: Data) {
         self.data = data
     }
+}
+
+// MARK: - String decoding
+
+extension ProcessOutput {
 
     /// Decoded UTF-8 string.
     public var string: String {
         string(strippingNewline: true)
+    }
+
+    public var lines: [String] {
+        return string.split(separator: "\n").map { String($0) }
     }
 
     /// Decode output bytes to string.
