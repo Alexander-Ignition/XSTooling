@@ -16,17 +16,8 @@ final class ProcessErrorTests: XCTestCase {
         let error = ProcessError(
             status: 2,
             reason: .exit,
-            data: Data("a".utf8))
+            data: Data("file not found".utf8))
 
-        XCTAssertEqual("\(error)", "exit: 2, a")
-    }
-
-    func testUncaughtSignalDescription() {
-        let error = ProcessError(
-            status: 3,
-            reason: .uncaughtSignal,
-            data: Data("b".utf8))
-
-        XCTAssertEqual("\(error)", "uncaught signal: 3, b")
+        XCTAssertEqual("\(error)", "file not found")
     }
 }

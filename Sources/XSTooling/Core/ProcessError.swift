@@ -17,18 +17,5 @@ public struct ProcessError: Error, Equatable {
 }
 
 extension ProcessError: CustomStringConvertible {
-    public var description: String {
-        "\(reasonDescription): \(status), \(string)"
-    }
-
-    private var reasonDescription: String {
-        switch reason {
-        case .exit:
-            return "exit"
-        case .uncaughtSignal:
-            return "uncaught signal"
-        @unknown default:
-            return "unknown reason(\(reason.rawValue))"
-        }
-    }
+    public var description: String { string }
 }
