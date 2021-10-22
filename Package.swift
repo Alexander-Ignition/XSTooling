@@ -21,6 +21,9 @@ let package = Package(
             dependencies: []),
         .testTarget(
             name: "XSToolingTests",
-            dependencies: ["XSTooling"]),
+            dependencies: ["XSTooling"],
+            resources: [
+                .copy("Fixtures")
+            ]),
     ]
 )

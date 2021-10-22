@@ -133,7 +133,7 @@ extension Simctl {
         return list
     }
 
-    public struct DeviceList: Codable {
+    public struct DeviceList: Codable, Equatable {
         /// Search options.
         public struct Options: OptionSet {
             public let rawValue: Int
@@ -153,6 +153,11 @@ extension Simctl {
 
         public let devices: [String: [DeviceInfo]]
         public let deviceTypes: [DeviceType]
+
+        public init() {
+            devices = [:]
+            deviceTypes = []
+        }
 
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -188,7 +193,7 @@ extension Simctl {
         public let name: String
     }
 
-    public struct DeviceType: Codable {
+    public struct DeviceType: Codable, Equatable {
         public let minRuntimeVersion: Int
         public let bundlePath: String
         public let maxRuntimeVersion: Int
