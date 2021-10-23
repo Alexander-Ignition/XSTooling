@@ -1,5 +1,5 @@
 /*:
- # XCTooling
+ # 🛠 XSTooling 🧰
 
  Xcode and Swift toolset
 

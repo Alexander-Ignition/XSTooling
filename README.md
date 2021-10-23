@@ -1,4 +1,4 @@
-# XSTooling
+# 🛠 XSTooling 🧰
 
 [![Test](https://github.com/Alexander-Ignition/XSTooling/actions/workflows/test.yml/badge.svg)](https://github.com/Alexander-Ignition/XSTooling/actions/workflows/test.yml)
 [![SPM compatible](https://img.shields.io/badge/spm-compatible-brightgreen.svg?style=flat)](https://swift.org/package-manager)
