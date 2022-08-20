@@ -1,6 +1,6 @@
-@preconcurrency import Foundation
+import Foundation
 
-public struct ProcessCommand: Hashable, Sendable {
+public struct ProcessCommand: Hashable {
     public static func find(_ name: String) -> ProcessCommand? {
         guard let string = ProcessInfo.processInfo.environment["PATH"] else {
             return nil

@@ -1,7 +1,7 @@
-@preconcurrency import Foundation
+import Foundation
 
 /// Output of executing an external command.
-public struct ProcessOutput: Hashable, Sendable {
+public struct ProcessOutput: Hashable {
     /// Constants that specify the termination reason values that the system returns.
     public typealias TerminationReason = Process.TerminationReason
 
