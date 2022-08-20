@@ -1,72 +1,91 @@
-import Foundation
+@preconcurrency import Foundation
 
-public struct ProcessOutput: Equatable {
-    /// Output bytes.
-    public let data: Data
+/// Output of executing an external command.
+public struct ProcessOutput: Hashable, Sendable {
+    /// Constants that specify the termination reason values that the system returns.
+    public typealias TerminationReason = Process.TerminationReason
 
-    /// A new process output.
+    /// The exit status the receiver’s executable returns.
+    public var code: Int32
+
+    /// The reason the system terminated the task.
+    public var reason: TerminationReason
+
+    /// Failed executable command.
+    public var command: ProcessCommand
+
+    /// Bytes from standard output stream.
+    public var standardOutput: Data
+
+    /// Bytes from standard error stream.
+    public var standardError: Data
+
+    public init(
+        code: Int32,
+        reason: TerminationReason,
+        command: ProcessCommand,
+        standardOutput: Data = Data(),
+        standardError: Data = Data()
+    ) {
+        self.code = code
+        self.reason = reason
+        self.command = command
+        self.standardOutput = standardOutput
+        self.standardError = standardError
+    }
+
+    // MARK: - Check
+
+    /// Check the success status of the exit code.
     ///
-    /// - Parameter data: Process output bytes.
-    public init(data: Data) {
-        self.data = data
-    }
-}
-
-// MARK: - String decoding
-
-extension ProcessOutput {
-
-    /// Decoded UTF-8 string.
-    public var string: String {
-        string(strippingNewline: true)
-    }
-
-    public var lines: [String] {
-        return string.split(separator: "\n").map { String($0) }
-    }
-
-    /// Decode output bytes to string.
-    ///
-    /// - Parameter strippingNewline: If true, newline characters are stripped from the result; otherwise, newline characters are preserved.
-    /// - Returns: Decoded UTF-8 string.
-    public func string(strippingNewline: Bool) -> String {
-        let string = String(decoding: data, as: UTF8.self)
-
-        if strippingNewline, string.hasSuffix("\n") {
-            return String(string.dropLast())
+    /// - Parameter code: success exit code. Default 0.
+    /// - Returns: same output.
+    /// - Throws: `ProcessOutputError`.
+    @discardableResult
+    public func check(code: Int32 = 0) throws -> ProcessOutput {
+        if self.code != code {
+            throw ProcessOutputError(output: self)
         }
-        return string
+        return self
     }
-}
 
-// MARK: - JSON Decoding
+    // MARK: - String
 
-extension ProcessOutput {
+    /// UTF8 string from output error stream.
+    public var string: String {
+        standardOutput.string(strippingNewline: true)
+    }
+
+    /// Error description from standard error stream.
+    public var errorDescription: String? {
+        guard !standardError.isEmpty else {
+            return nil
+        }
+        return standardError.string(strippingNewline: true)
+    }
+
+    // MARK: - JSON
+
     /// Default JSON decoder.
     private static let decoder = JSONDecoder()
 
     public func decode<T>(
-        _ type: T.Type
-    ) throws -> T where T: Decodable {
-        try decode(type, using: ProcessOutput.decoder)
-    }
-
-    public func decode<T>(
         _ type: T.Type,
-        using decoder: JSONDecoder
+        using decoder: JSONDecoder? = nil
     ) throws -> T where T: Decodable {
-        try decoder.decode(type, from: data)
+
+        try (decoder ?? Self.decoder).decode(type, from: standardOutput)
     }
 }
 
-// MARK: - String protocols
+extension Data {
+    private static let newLine = UInt8(ascii: "\n")
 
-extension ProcessOutput: CustomStringConvertible {
-    public var description: String { string }
-}
-
-extension ProcessOutput: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        self.data = Data(value.utf8)
+    fileprivate func string(strippingNewline: Bool) -> String {
+        var buffer = self
+        if strippingNewline, buffer.last == Self.newLine {
+            buffer = buffer.dropLast()
+        }
+        return String(decoding: buffer, as: UTF8.self)
     }
 }
