@@ -1,17 +1,17 @@
 /// Run or locate development tools and properties.
-public struct XCRun: ExternalTool, Equatable {
-    public var command: Command
+public struct XCRun: Equatable {
+    public var command: ProcessCommand
 
     public init(path: String = "/usr/bin/xcrun") {
-        self.command = Command(path: path)
+        self.command = ProcessCommand(path: path)
     }
 
-    public init(command: Command) {
+    public init(command: ProcessCommand) {
         self.command = command
     }
 
     /// Show the xcrun version.
-    public var version: Command {
+    public var version: ProcessCommand {
         command.argument("--version")
     }
 
@@ -19,7 +19,7 @@ public struct XCRun: ExternalTool, Equatable {
     ///
     /// - Parameter tool: The tool name.
     /// - Returns: The tool path.
-    public func find(_ tool: String) -> Command {
+    public func find(_ tool: String) -> ProcessCommand {
         command.arguments("--find", tool)
     }
 

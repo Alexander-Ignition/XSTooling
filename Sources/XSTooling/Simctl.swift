@@ -1,8 +1,8 @@
 /// Command line utility to control the Simulator.
-public struct Simctl: ExternalTool, Equatable {
-    public var command: Command
+public struct Simctl: Equatable {
+    public var command: ProcessCommand
 
-    public init(command: Command) {
+    public init(command: ProcessCommand) {
         self.command = command
     }
 
@@ -19,17 +19,17 @@ public struct Simctl: ExternalTool, Equatable {
         let udid: String
 
         /// Boot a device or device pair.
-        public var boot: Command {
+        public var boot: ProcessCommand {
             simulator.command.arguments("boot", udid)
         }
 
         /// Shutdown a device.
-        public var shutdown: Command {
+        public var shutdown: ProcessCommand {
             simulator.command.arguments("shutdown", udid)
         }
 
         /// Open a URL in a device.
-        public func open(url: String) -> Command {
+        public func open(url: String) -> ProcessCommand {
             simulator.command.arguments("openurl", udid, url)
         }
 
@@ -48,12 +48,12 @@ public struct Simctl: ExternalTool, Equatable {
         }
 
         /// Launch an application by identifier on a device.
-        public var launch: Command {
+        public var launch: ProcessCommand {
             device.simulator.command.arguments("launch", device.udid, bundleIdentifier)
         }
 
         /// Terminate an application by identifier on a device.
-        public var terminate: Command {
+        public var terminate: ProcessCommand {
             device.simulator.command.arguments("terminate", device.udid, bundleIdentifier)
         }
     }
@@ -63,20 +63,20 @@ public struct Simctl: ExternalTool, Equatable {
         let application: ApplicationControl
 
         /// The .app bundle.
-        public var app: Command { _path("app") }
+        public var app: ProcessCommand { _path("app") }
 
         /// The application's data container.
-        public var data: Command { _path("data") }
+        public var data: ProcessCommand { _path("data") }
 
         /// The App Group containers.
-        public var groups: Command { _path("groups") }
+        public var groups: ProcessCommand { _path("groups") }
 
         /// A specific App Group container.
-        public func group(_ identifier: String) -> Command {
+        public func group(_ identifier: String) -> ProcessCommand {
             _path(identifier)
         }
 
-        private func _path(_ container: String) -> Command {
+        private func _path(_ container: String) -> ProcessCommand {
             // Usage: simctl get_app_container <device> <app bundle identifier> [<container>]
             application.device.simulator.command.arguments(
                 "get_app_container",

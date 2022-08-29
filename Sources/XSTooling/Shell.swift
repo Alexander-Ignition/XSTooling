@@ -1,23 +1,23 @@
 import Foundation
 
-public struct Shell: ExternalTool, Equatable {
+public struct Shell: Equatable {
     /// Basic command.
     ///
     /// Contains common parameters for all commands in the tool.
-    public var command: Command
+    public var command: ProcessCommand
 
     /// A new shell.
     ///
     /// - Parameter path: executable file location.
     public init(path: String) {
-        self.command = Command(path: path)
+        self.command = ProcessCommand(path: path)
     }
 
-    public func callAsFunction(_ string: String) -> Command {
+    public func callAsFunction(_ string: String) -> ProcessCommand {
         command(string: string)
     }
 
-    public func command(string: String) -> Command {
+    public func command(string: String) -> ProcessCommand {
         command.arguments("-c", string)
     }
 }
@@ -61,12 +61,12 @@ extension Shell {
 
 extension Shell {
     /// Show version information for this instance of bash on the standard output and exit successfully.
-    public var version: Command {
+    public var version: ProcessCommand {
         command.argument("--version")
     }
 
     /// Locate a program file in the user's path.
-    public func which(_ name: String) -> Command {
+    public func which(_ name: String) -> ProcessCommand {
         command(string: "which \(name)")
     }
 }
