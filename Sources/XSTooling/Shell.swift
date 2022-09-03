@@ -18,7 +18,7 @@ public struct Shell: Equatable {
     }
 
     public func command(string: String) -> ProcessCommand {
-        command.arguments("-c", string)
+        command.appending(arguments: "-c", string)
     }
 }
 
@@ -62,7 +62,7 @@ extension Shell {
 extension Shell {
     /// Show version information for this instance of bash on the standard output and exit successfully.
     public var version: ProcessCommand {
-        command.argument("--version")
+        command.appending(argument: "--version")
     }
 
     /// Locate a program file in the user's path.

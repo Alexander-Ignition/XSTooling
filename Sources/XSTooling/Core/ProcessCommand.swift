@@ -64,21 +64,21 @@ public struct ProcessCommand: Hashable {
             successCode: successCode)
     }
 
-    // MARK: - Copying
+    // MARK: - Arguments
 
-    public func argument(_ string: String) -> ProcessCommand {
+    public func appending(argument: String) -> ProcessCommand {
         var copy = self
-        copy.arguments.append(string)
+        copy.arguments.append(argument)
         return copy
     }
 
-    public func arguments(_ strings: String...) -> ProcessCommand {
-        arguments(strings)
+    public func appending(arguments: String...) -> ProcessCommand {
+        appending(arguments: arguments)
     }
 
-    public func arguments(_ strings: [String]) -> ProcessCommand {
+    public func appending(arguments: [String]) -> ProcessCommand {
         var copy = self
-        copy.arguments.append(contentsOf: strings)
+        copy.arguments.append(contentsOf: arguments)
         return copy
     }
 

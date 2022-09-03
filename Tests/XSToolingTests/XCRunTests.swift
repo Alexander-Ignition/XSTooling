@@ -14,7 +14,7 @@ final class XCRunTests: XCTestCase {
     func testExecute() async {
         do {
             xcrun = XCRun()
-            try await xcrun.command.arguments("xcodebuild", "-version").run()
+            try await xcrun.command.appending(arguments: "xcodebuild", "-version").run()
         } catch {
             XCTFail("\(error)")
         }

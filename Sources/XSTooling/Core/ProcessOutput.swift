@@ -83,7 +83,7 @@ extension Data {
 
     fileprivate func string(strippingNewline: Bool) -> String {
         var buffer = self
-        if strippingNewline, buffer.last == Self.newLine {
+        if strippingNewline, buffer.last == Self.newLine { // TODO: \r\n or \n
             buffer = buffer.dropLast()
         }
         return String(decoding: buffer, as: UTF8.self)

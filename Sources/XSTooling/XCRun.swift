@@ -12,7 +12,7 @@ public struct XCRun: Equatable {
 
     /// Show the xcrun version.
     public var version: ProcessCommand {
-        command.argument("--version")
+        command.appending(argument: "--version")
     }
 
     /// Only find and return the tool path.
@@ -20,11 +20,11 @@ public struct XCRun: Equatable {
     /// - Parameter tool: The tool name.
     /// - Returns: The tool path.
     public func find(_ tool: String) -> ProcessCommand {
-        command.arguments("--find", tool)
+        command.appending(arguments: "--find", tool)
     }
 
     /// A new simulator control.
     public var simctl: Simctl {
-        Simctl(command: command.argument("simctl"))
+        Simctl(command: command.appending(argument: "simctl"))
     }
 }

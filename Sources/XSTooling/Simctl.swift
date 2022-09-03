@@ -20,17 +20,17 @@ public struct Simctl: Equatable {
 
         /// Boot a device or device pair.
         public var boot: ProcessCommand {
-            simulator.command.arguments("boot", udid)
+            simulator.command.appending(arguments: "boot", udid)
         }
 
         /// Shutdown a device.
         public var shutdown: ProcessCommand {
-            simulator.command.arguments("shutdown", udid)
+            simulator.command.appending(arguments: "shutdown", udid)
         }
 
         /// Open a URL in a device.
         public func open(url: String) -> ProcessCommand {
-            simulator.command.arguments("openurl", udid, url)
+            simulator.command.appending(arguments: "openurl", udid, url)
         }
 
         public func app(_ appBundleIdentifier: String) -> ApplicationControl {
@@ -49,12 +49,12 @@ public struct Simctl: Equatable {
 
         /// Launch an application by identifier on a device.
         public var launch: ProcessCommand {
-            device.simulator.command.arguments("launch", device.udid, bundleIdentifier)
+            device.simulator.command.appending(arguments: "launch", device.udid, bundleIdentifier)
         }
 
         /// Terminate an application by identifier on a device.
         public var terminate: ProcessCommand {
-            device.simulator.command.arguments("terminate", device.udid, bundleIdentifier)
+            device.simulator.command.appending(arguments: "terminate", device.udid, bundleIdentifier)
         }
     }
 
@@ -78,7 +78,7 @@ public struct Simctl: Equatable {
 
         private func _path(_ container: String) -> ProcessCommand {
             // Usage: simctl get_app_container <device> <app bundle identifier> [<container>]
-            application.device.simulator.command.arguments(
+            application.device.simulator.command.appending(arguments:
                 "get_app_container",
                 application.device.udid,
                 application.bundleIdentifier,
@@ -92,7 +92,7 @@ public struct Simctl: Equatable {
 extension Simctl {
     /// List available devices, device types, runtimes, and device pairs.
     public var list: ListQuery<Void> {
-        ListQuery(command: command.argument("list"))
+        ListQuery(command: command.appending(argument: "list"))
     }
 
     /// List available devices, device types, runtimes, and device pairs.
@@ -112,7 +112,7 @@ extension Simctl {
         if available {
             arguments.append("available")
         }
-        return ListQuery(command: command.arguments(arguments))
+        return ListQuery(command: command.appending(arguments: arguments))
     }
 
     public struct ListQuery<Format> {
@@ -132,7 +132,7 @@ extension Simctl {
 extension Simctl.ListQuery where Format == Void {
     /// Output as JSON.
     public var json: Simctl.ListQuery<Simctl.DeviceList> {
-        Simctl.ListQuery(command: command.argument("--json"))
+        Simctl.ListQuery(command: command.appending(argument: "--json"))
     }
 }
 
