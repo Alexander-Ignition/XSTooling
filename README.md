@@ -34,8 +34,11 @@ Finally, add `import XSTooling` to your source code.
 ```swift
 import XSTooling
 
-let shell = Shell.default
+let sh = Shell.default
+try await sh("swift build").run()
 ```
+
+## Shell
 
 Shell command can be `run` or `read`.
 
