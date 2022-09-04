@@ -1,89 +1,115 @@
 import XCTest
 import XSTooling
 
-final class SimctlTests: ToolTestCase {
+final class SimctlTests: XCTestCase {
     private var simctl: Simctl!
+    private var path: String!
 
     override func setUp() {
         super.setUp()
-        simctl = Simctl(path: path, kernel: kernel)
+        path = "/usr/bin/simctl/\(name)"
+        simctl = Simctl(command: ProcessCommand(path: path))
     }
 
-    // MARK: - Device
+    // MARK: - Device control
 
     func testDeviceBoot() {
-        XCTAssertNoThrow(try simctl.device("2").boot())
-        XCTAssertEqual(commands, [["boot", "2"]])
+        let command = simctl.device("2").boot
+
+        command.assert.equal(path: path, arguments: "boot", "2")
     }
 
     func testDeviceShutdown() {
-        XCTAssertNoThrow(try simctl.device("3").shutdown())
-        XCTAssertEqual(commands, [["shutdown", "3"]])
+        let command = simctl.device("3").shutdown
+
+        command.assert.equal(path: path, arguments: "shutdown", "3")
     }
 
     func testDeviceOpenURL() {
-        XCTAssertNoThrow(try simctl.device("0").open(url: "link"))
-        XCTAssertEqual(commands, [["openurl", "0", "link"]])
+        let command = simctl.device("device-udid").open(url: "https://example.com")
+
+        command.assert.equal(path: path, arguments: "openurl", "device-udid", "https://example.com")
     }
 
     func testBootedDeviceOpenURL() {
-        XCTAssertNoThrow(try simctl.booted.open(url: "https://example-0.com"))
-        XCTAssertEqual(commands, [["openurl", "booted", "https://example-0.com"]])
+        let command = simctl.booted.open(url: "https://test.com")
+
+        command.assert.equal(path: path, arguments: "openurl", "booted", "https://test.com")
     }
 
-    // MARK: - App
+    // MARK: - App control
 
     func testDeviceAppLaunch() {
-        output = "com.example.app-0: 11"
-        XCTAssertEqual(try simctl.device("4").app("com.example.app-0").launch(), 11)
-        XCTAssertEqual(commands, [["launch", "4", "com.example.app-0"]])
+        let command = simctl.device("4").app("com.bundle.app").launch
+
+        command.assert.equal(path: path, arguments: "launch", "4", "com.bundle.app")
     }
 
     func testDeviceAppTerminate() {
-        XCTAssertNoThrow(try simctl.device("5").app("com.example.app-1").terminate())
-        XCTAssertEqual(commands, [["terminate", "5", "com.example.app-1"]])
+        let command = simctl.device("5").app("com.bundle.app2").terminate
+
+        command.assert.equal(path: path, arguments: "terminate", "5", "com.bundle.app2")
     }
 
     // MARK: - App container
 
     func testDeviceAppContainerApp() {
-        output = "device/app/container/app"
-        XCTAssertEqual(try simctl.device("6").app("com.example.app-2").container.app(), "device/app/container/app")
-        XCTAssertEqual(commands, [["get_app_container", "6", "com.example.app-2", "app"]])
+        let command = simctl.device("6").app("com.bundle.app3").container.app
+
+        command.assert.equal(path: path, arguments: "get_app_container", "6", "com.bundle.app3", "app")
     }
 
     func testDeviceAppContainerData() {
-        output = "device/app/container/data"
-        XCTAssertEqual(try simctl.device("7").app("com.example.app-3").container.data(), "device/app/container/data")
-        XCTAssertEqual(commands, [["get_app_container", "7", "com.example.app-3", "data"]])
+        let command = simctl.device("7").app("com.bundle.app4").container.data
+
+        command.assert.equal(path: path, arguments: "get_app_container", "7", "com.bundle.app4", "data")
     }
 
     func testDeviceAppContainerGroups() {
-        output = "device/app/container/groups"
-        XCTAssertEqual(try simctl.device("8").app("com.example.app-4").container.groups(), "device/app/container/groups")
-        XCTAssertEqual(commands, [["get_app_container", "8", "com.example.app-4", "groups"]])
+        let command = simctl.device("8").app("com.bundle.app5").container.groups
+
+        command.assert.equal(path: path, arguments: "get_app_container", "8", "com.bundle.app5", "groups")
     }
 
     func testDeviceAppContainerGroup() {
-        output = "device/app/container/group/g"
-        XCTAssertEqual(try simctl.device("8").app("com.example.app-4").container.group("g"), "device/app/container/group/g")
-        XCTAssertEqual(commands, [["get_app_container", "8", "com.example.app-4", "g"]])
+        let command = simctl.device("9").app("com.bundle.app6").container.group("g")
+
+        command.assert.equal(path: path, arguments: "get_app_container", "9", "com.bundle.app6", "g")
     }
 
     // MARK: - Device list
 
-    func testDeviceList() throws {
-        output = ProcessOutput(data: try readDeviceListData())
-        let deviceList = try JSONDecoder().decode(Simctl.DeviceList.self, from: output.data)
-        XCTAssertEqual(try simctl.list(), deviceList)
-        XCTAssertEqual(commands, [["list", "--json"]])
+    func testDeviceList() {
+        let command = simctl.list.command
+
+        command.assert.equal(path: path, arguments: "list")
+    }
+
+    func testDeviceListJson() {
+        let command = simctl.list.json.command
+
+        command.assert.equal(path: path, arguments: "list", "--json")
+    }
+
+    func testDeviceListJsonDecode() async {
+        simctl = XCRun().simctl
+        do {
+            let deviceList = try await simctl.list.json.decode()
+            XCTAssertFalse(deviceList.devices.isEmpty)
+        } catch {
+            XCTFail("\(error)")
+        }
     }
 
     func testDeviceListFilter() {
-        output = "{}"
-        let list = Simctl.DeviceList()
-        XCTAssertEqual(try simctl.list(.devices, options: .available, "iPhone 8"), list)
-        XCTAssertEqual(commands, [["list", "--json", "devices", "iPhone 8", "available"]])
+        var command = simctl.list(.devices).command
+        command.assert.equal(path: path, arguments: "list", "devices")
+
+        command = simctl.list(.devices, "iPhone 8").command
+        command.assert.equal(path: path, arguments: "list", "devices", "iPhone 8")
+
+        command = simctl.list(.devices, available: true).command
+        command.assert.equal(path: path, arguments: "list", "devices", "available")
     }
 
     func testDeviceListBooted() throws {
@@ -106,14 +132,13 @@ final class SimctlTests: ToolTestCase {
         XCTAssertTrue(devices.allSatisfy({ $0.name.hasPrefix("iPhone") }))
     }
 
-    private func readDeviceListData() throws -> Data {
-        let url = Bundle.module.url(forResource: "deviceList", withExtension: "json", subdirectory: "Fixtures/Simctl")
-        let validUrl = try XCTUnwrap(url)
-        return try Data(contentsOf: validUrl)
-    }
-
     private func readDeviceList() throws -> Simctl.DeviceList {
-        let data = try readDeviceListData()
+        let url = Bundle.module.url(
+            forResource: "deviceList",
+            withExtension: "json",
+            subdirectory: "Fixtures/Simctl")
+        let validUrl = try XCTUnwrap(url)
+        let data = try Data(contentsOf: validUrl)
         return try JSONDecoder().decode(Simctl.DeviceList.self, from: data)
     }
 }

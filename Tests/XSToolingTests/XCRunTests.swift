@@ -1,25 +1,34 @@
 import XCTest
 import XSTooling
 
-final class XCRunTests: ToolTestCase {
+final class XCRunTests: XCTestCase {
     private var xcrun: XCRun!
+    private var path: String!
 
     override func setUp() {
         super.setUp()
-        xcrun = XCRun(path: path, kernel: kernel)
+        path = "/usr/bin/xcrun/\(name)"
+        xcrun = XCRun(path: path)
     }
 
-    func testInitWithDefaults() {
-        xcrun = XCRun()
-        XCTAssertEqual(xcrun.path, "/usr/bin/xcrun")
-        XCTAssertTrue(xcrun.kernel === Kernel.system)
+    func testExecute() async {
+        do {
+            xcrun = XCRun()
+            try await xcrun.command.appending(arguments: "xcodebuild", "-version").run()
+        } catch {
+            XCTFail("\(error)")
+        }
     }
 
-    func testSimctl() throws {
-        output = "/text/simctl"
-        let simctl = try xcrun.simctl()
-        XCTAssertEqual(commands, [["--find", "simctl"]])
-        XCTAssertEqual(simctl.path, "/text/simctl")
-        XCTAssertTrue(xcrun.kernel === kernel)
+    func testFind() {
+        let command = xcrun.find("swift")
+
+        command.assert.equal(path: path, arguments: "--find", "swift")
+    }
+
+    func testSimctl() {
+        let simctl = xcrun.simctl
+
+        simctl.command.assert.equal(path: path, arguments: "simctl")
     }
 }

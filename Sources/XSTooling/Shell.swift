@@ -1,31 +1,62 @@
-public struct Shell: Tool {
+import Foundation
+
+public struct Shell: Equatable {
+    /// The default shell.
+    public static var `default`: Shell {
+        let path = ProcessInfo.processInfo.environment["SHELL"]
+        return path.map { Shell(path: $0) } ?? bash
+    }
+    
     /// POSIX-compliant command interpreter.
-    public static let sh = Shell(path: "/bin/sh", arguments: ["-c"])
+    public static let sh = Shell(path: "/bin/sh")
 
     /// GNU Bourne-Again SHell.
-    public static let bash = Shell(path: "/bin/bash", arguments: ["-c"])
+    public static let bash = Shell(path: "/bin/bash")
 
-    public var path: String
-    public var arguments: [String]
-    public var kernel: Kernel
+    /// The Z shell.
+    public static let zsh = Shell(path: "/bin/zsh")
 
-    public init(path: String, arguments: [String], kernel: Kernel = .system) {
-        self.path = path
-        self.arguments = arguments
-        self.kernel = kernel
+    /// Basic command.
+    ///
+    /// Contains common parameters for all commands in the tool.
+    public var command: ProcessCommand
+
+    /// A new shell.
+    ///
+    /// - Parameter path: executable file location.
+    public init(path: String) {
+        self.command = ProcessCommand(path: path)
     }
 
-    @discardableResult
-    public func callAsFunction(_ arguments: String...) throws -> ProcessOutput {
-        try execute(arguments: arguments)
+    // MARK: - Options
+
+    public var verbose: Shell { option("--verbose") }
+
+    public var login: Shell { option("--login") }
+
+    private func option(_ value: String) -> Shell {
+        var shell = self
+        shell.command.arguments.append(value)
+        return shell
     }
 
-    public func which(_ tool: String) throws -> String {
-        try execute("which", tool).string
+    // MARK: - Commands
+
+    /// Show version information for this instance of bash on the standard output and exit successfully.
+    public var version: ProcessCommand {
+        command.appending(argument: "--version")
     }
 
-    public func execute(arguments: [String]) throws -> ProcessOutput {
-        let script = arguments.joined(separator: " ")
-        return try kernel.execute(path: path, arguments: self.arguments + [script])
+    public func callAsFunction(_ string: String) -> ProcessCommand {
+        command(string: string)
+    }
+
+    public func command(string: String) -> ProcessCommand {
+        command.appending(arguments: "-c", string)
+    }
+
+    /// Locate a program file in the user's path.
+    public func which(_ name: String) -> ProcessCommand {
+        command(string: "which \(name)")
     }
 }

@@ -1,96 +1,88 @@
 /// Command line utility to control the Simulator.
-public struct Simctl: Tool {
-    public let path: String
-    public let kernel: Kernel
+public struct Simctl: Equatable {
+    public var command: ProcessCommand
 
-    public init(path: String, kernel: Kernel) {
-        self.path = path
-        self.kernel = kernel
+    public init(command: ProcessCommand) {
+        self.command = command
     }
 
-    public var booted: Device {
-        Device(simctl: self, udid: "booted")
+    public var booted: DeviceControl {
+        DeviceControl(simulator: self, udid: "booted")
     }
 
-    public func device(_ uuid: String) -> Device {
-        Device(simctl: self, udid: uuid)
+    public func device(_ uuid: String) -> DeviceControl {
+        DeviceControl(simulator: self, udid: uuid)
     }
 
-    public struct Device {
-        let simctl: Simctl
+    public struct DeviceControl {
+        let simulator: Simctl
         let udid: String
 
         /// Boot a device or device pair.
-        public func boot() throws {
-            try simctl.execute("boot", udid)
+        public var boot: ProcessCommand {
+            simulator.command.appending(arguments: "boot", udid)
         }
 
         /// Shutdown a device.
-        public func shutdown() throws {
-            try simctl.execute("shutdown", udid)
+        public var shutdown: ProcessCommand {
+            simulator.command.appending(arguments: "shutdown", udid)
         }
 
         /// Open a URL in a device.
-        public func open(url: String) throws {
-            try simctl.execute("openurl", udid, url)
+        public func open(url: String) -> ProcessCommand {
+            simulator.command.appending(arguments: "openurl", udid, url)
         }
 
-        public func app(_ appBundleIdentifier: String) -> Application {
-            Application(device: self, appBundleIdentifier: appBundleIdentifier)
+        public func app(_ appBundleIdentifier: String) -> ApplicationControl {
+            ApplicationControl(device: self, bundleIdentifier: appBundleIdentifier)
         }
     }
 
-    public struct Application {
-        let device: Device
-        let appBundleIdentifier: String
+    public struct ApplicationControl {
+        let device: DeviceControl
+        let bundleIdentifier: String
 
+        /// Installed app's container.
         public var container: Container {
             Container(application: self)
         }
 
         /// Launch an application by identifier on a device.
-        @discardableResult
-        public func launch() throws -> Int? {
-            let output = try device.simctl.execute("launch", device.udid, appBundleIdentifier)
-            // <app_bundle_identifier>: <process_id>
-            return output.string.split(separator: " ").last.flatMap { Int($0) }
+        public var launch: ProcessCommand {
+            device.simulator.command.appending(arguments: "launch", device.udid, bundleIdentifier)
         }
 
         /// Terminate an application by identifier on a device.
-        public func terminate() throws {
-            try device.simctl.execute("terminate", device.udid, appBundleIdentifier)
+        public var terminate: ProcessCommand {
+            device.simulator.command.appending(arguments: "terminate", device.udid, bundleIdentifier)
         }
     }
 
     /// Installed app's container.
     public struct Container {
-        let application: Application
+        let application: ApplicationControl
 
         /// The .app bundle.
-        public func app() throws -> String {
-            try run("app")
-        }
+        public var app: ProcessCommand { _path("app") }
 
         /// The application's data container.
-        public func data() throws -> String {
-            try run("data")
-        }
+        public var data: ProcessCommand { _path("data") }
 
         /// The App Group containers.
-        public func groups() throws -> String {
-            try run("groups")
-        }
+        public var groups: ProcessCommand { _path("groups") }
 
         /// A specific App Group container.
-        public func group(_ identifier: String) throws -> String {
-            try run(identifier)
+        public func group(_ identifier: String) -> ProcessCommand {
+            _path(identifier)
         }
 
-        private func run(_ container: String) throws -> String {
-            let device = application.device
-            let appId = application.appBundleIdentifier
+        private func _path(_ container: String) -> ProcessCommand {
             // Usage: simctl get_app_container <device> <app bundle identifier> [<container>]
-            return try device.simctl.execute("get_app_container", device.udid, appId, container).string
+            application.device.simulator.command.appending(arguments:
+                "get_app_container",
+                application.device.udid,
+                application.bundleIdentifier,
+                container)
         }
     }
 }
@@ -99,53 +91,60 @@ public struct Simctl: Tool {
 
 extension Simctl {
     /// List available devices, device types, runtimes, and device pairs.
-    ///
-    /// - Throws: `ProcessError`.
-    /// - Returns: A new `DeviceList`.
-    public func list() throws -> DeviceList {
-        return try execute("list", "--json").decode(DeviceList.self)
+    public var list: ListQuery<Void> {
+        ListQuery(command: command.appending(argument: "list"))
     }
 
-    /// List available devices, device types, runtimes, or device pairs.
+    /// List available devices, device types, runtimes, and device pairs.
     ///
-    /// - Parameters:
-    ///   - key: Specify one of `.devices`, `.deviceTypes`, `.runtimes`, or `.pairs` to list only items of that type.
-    ///   - options: Search options. Default: `.available`.
-    ///   - search: If a type filter is specified you may also specify a search term. Search terms use a simple case-insensitive contains check against the item's description.
-    /// - Throws: `ProcessError`.
-    /// - Returns: A new `DeviceList`.
+    /// Specify one of 'devices', 'devicetypes', 'runtimes', or 'pairs' to list only items of that type.
+    /// If a type filter is specified you may also specify a search term. Search terms use a simple case-insensitive
+    /// contains check against the item's description. You may use the search term 'available' to only list available items.
     public func list(
         _ key: DeviceList.CodingKeys,
-        options: DeviceList.Options = .available,
-        _ search: String? = nil
-    ) throws -> DeviceList {
-        // Usage: simctl list [-j | --json] [-v] [devices|devicetypes|runtimes|pairs] [<search term>|available]
-        var arguments = ["list", "--json", key.rawValue]
-
-        if let search = search {
-            arguments.append(search)
+        _ term: String? = nil,
+        available: Bool = false
+    ) -> ListQuery<Void> {
+        var arguments: [String] = ["list", key.rawValue]
+        if let term = term {
+            arguments.append(term)
         }
-        if options.contains(.available) {
+        if available {
             arguments.append("available")
         }
-        let output = try execute(arguments: arguments)
-        let list = try output.decode(DeviceList.self)
-        return list
+        return ListQuery(command: command.appending(arguments: arguments))
     }
 
-    public struct DeviceList: Codable, Equatable {
-        /// Search options.
-        public struct Options: OptionSet {
-            public let rawValue: Int
+    public struct ListQuery<Format> {
+        public var command: ProcessCommand
 
-            public init(rawValue: Int) {
-                self.rawValue = rawValue
-            }
-
-            /// You may use the search term 'available' to only list available items.
-            public static let available = Options(rawValue: 1)
+        public func read() async throws -> ProcessOutput {
+            try await command.read()
         }
 
+        @discardableResult
+        public func run(_ redirection: ProcessRedirection? = nil) async throws -> ProcessOutput {
+            try await command.run()
+        }
+    }
+}
+
+extension Simctl.ListQuery where Format == Void {
+    /// Output as JSON.
+    public var json: Simctl.ListQuery<Simctl.DeviceList> {
+        Simctl.ListQuery(command: command.appending(argument: "--json"))
+    }
+}
+
+extension Simctl.ListQuery where Format == Simctl.DeviceList {
+    /// Read and decode output.
+    public func decode() async throws -> Simctl.DeviceList {
+        try await read().decode(Simctl.DeviceList.self)
+    }
+}
+
+extension Simctl {
+    public struct DeviceList: Codable, Equatable {
         public enum CodingKeys: String, CodingKey {
             case devices
             case deviceTypes = "devicetypes"
