@@ -1,6 +1,6 @@
 import Foundation
 
-/// Output of executing an external command.
+/// Output of the process execution.
 public struct ProcessOutput: Hashable {
     /// Constants that specify the termination reason values that the system returns.
     public typealias TerminationReason = Process.TerminationReason
@@ -51,7 +51,7 @@ public struct ProcessOutput: Hashable {
 
     // MARK: - String
 
-    /// UTF8 string from output error stream.
+    /// UTF8 string from standard output stream.
     public var string: String {
         standardOutput.string(strippingNewline: true)
     }

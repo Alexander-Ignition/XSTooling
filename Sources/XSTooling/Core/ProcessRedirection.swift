@@ -1,6 +1,6 @@
 import Foundation
 
-/// Redirecting the input output of an external command.
+/// Redirecting the I/O of the process..
 public struct ProcessRedirection: Equatable {
     enum Target: Equatable {
         /// A wrapper for a file descriptor.

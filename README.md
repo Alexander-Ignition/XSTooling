@@ -51,7 +51,7 @@ Run shell command with redirection to stdout and stderr.
 try await sh("ls -al").run()
 ```
 
-Redirection can be configured by yourself. For example in a file for logs.
+Redirection can be configured, for example, to write to a log file.
 
 ```swift
 let url = URL(fileURLWithPath: "logs.txt", isDirectory: false)
@@ -112,7 +112,7 @@ By analogy with Shell, you can make other wrappers over the `ProcessCommand`
 
 `Simctl` (Simulator control tool) is an example of a complex such wrapper
 
-Using semctl, you can search for iPhone 12, turn it on and launch the application.
+Using simctl, you can search for iPhone 12, turn it on and launch the application.
 
 ```swift
 let xcrun = XCRun()

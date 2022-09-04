@@ -1,8 +1,8 @@
 import Foundation
 
-/// External command execution error.
+/// Process execution error.
 public struct ProcessOutputError: Error, Equatable {
-    /// Failed execution result.
+    /// Output of the process that ended with an error.
     public let output: ProcessOutput
 
     public init(output: ProcessOutput) {
