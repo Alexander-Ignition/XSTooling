@@ -19,5 +19,7 @@ jobs:
       - name: Install xcaudit
         uses: Alexander-Ignition/XCAudit@main
       - name: Build and test
-        run: swift test --enable-code-coverage --disable-automatic-resolution 2>&1 | xcaudit
+        run: |
+          swift test --enable-code-coverage --disable-automatic-resolution 2>&1 | xcaudit
+          ./.github/scripts/codecov.sh $(swift test --show-codecov-path)
         shell: bash
