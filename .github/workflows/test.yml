@@ -21,7 +21,7 @@ jobs:
       - name: Build and test
         run: |
           swift test --enable-code-coverage --disable-automatic-resolution 2>&1 | xcaudit
-          echo "```bash" >> $GITHUB_STEP_SUMMARY
+          echo "<code>" >> $GITHUB_STEP_SUMMARY
           ./.github/scripts/codecov.sh $(swift test --show-codecov-path) >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo "</code>" >> $GITHUB_STEP_SUMMARY
         shell: bash
