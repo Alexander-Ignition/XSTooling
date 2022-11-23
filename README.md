@@ -60,9 +60,7 @@ Redirection can be configured, for example, to write to a log file.
 let url = URL(fileURLWithPath: "logs.txt", isDirectory: false)
 FileManager.default.createFile(atPath: url.path, contents: nil)
 let file = try FileHandle(forWritingTo: url)
-defer {
-    try! file.close()
-}
+
 try await sh("swift build").run(.output(file).error(file))
 ```
 
@@ -81,7 +79,7 @@ Conceptually, a `Shell` is a wrapper over a `ProcessCommand`.
 - `sh("ls")` each call to this method returned a copy of the `ProcessCommand` with additional arguments
 
 ```swift
-sh = Shell.default
+let sh = Shell.default
 sh.command // ProcessCommand
 sh.command.environment // [String: String]?
 sh.command.currentDirectoryURL // URL?
