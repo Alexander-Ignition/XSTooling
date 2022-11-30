@@ -15,7 +15,7 @@ final class ShellTests: XCTestCase {
         shell = Shell.sh
         shell.command.assert.equal(path: "/bin/sh")
 
-        let string = try await shell("echo hello world").read().string
+        let string = try await shell("echo 'hello world'").read().string
         XCTAssertEqual(string, "hello world")
     }
 
@@ -23,7 +23,7 @@ final class ShellTests: XCTestCase {
         shell = Shell.bash
         shell.command.assert.equal(path: "/bin/bash")
 
-        let string = try await shell("echo hello world").read().string
+        let string = try await shell("echo 'hello world'").read().string
         XCTAssertEqual(string, "hello world")
     }
 
@@ -33,7 +33,7 @@ final class ShellTests: XCTestCase {
         shell = Shell.zsh
         shell.command.assert.equal(path: "/bin/zsh")
 
-        let string = try await shell("echo hello world").read().string
+        let string = try await shell("echo 'hello world'").read().string
         XCTAssertEqual(string, "hello world")
     }
 
