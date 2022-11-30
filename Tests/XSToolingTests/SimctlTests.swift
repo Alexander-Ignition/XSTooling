@@ -1,6 +1,8 @@
 import XCTest
 import XSTooling
 
+#if os(macOS)
+
 final class SimctlTests: XCTestCase {
     private var simctl: Simctl!
     private var path: String!
@@ -142,3 +144,5 @@ final class SimctlTests: XCTestCase {
         return try JSONDecoder().decode(Simctl.DeviceList.self, from: data)
     }
 }
+
+#endif

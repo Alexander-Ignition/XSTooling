@@ -27,6 +27,8 @@ final class ShellTests: XCTestCase {
         XCTAssertEqual(string, "hello world")
     }
 
+#if os(macOS)
+
     func testZsh() async throws {
         shell = Shell.zsh
         shell.command.assert.equal(path: "/bin/zsh")
@@ -34,6 +36,8 @@ final class ShellTests: XCTestCase {
         let string = try await shell("echo hello world").read().string
         XCTAssertEqual(string, "hello world")
     }
+
+#endif
 
     func testVerbose() {
         let command = shell.verbose.command
