@@ -117,8 +117,8 @@ final class ProcessCommandTests: XCTestCase {
 
     func testTerminate() async throws {
         let info = ProcessInfo.processInfo
+        print("processorCount:", info.processorCount)
         print("activeProcessorCount:", info.activeProcessorCount)
-        print("automaticTerminationSupportEnabled:", info.automaticTerminationSupportEnabled)
         print(info.environment)
 
         let task = Task.detached {
