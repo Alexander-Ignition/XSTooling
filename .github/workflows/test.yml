@@ -25,7 +25,7 @@ jobs:
         shell: bash
   Linux:
     name: Test Linux
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     container:
       image: swift:5.6-focal
     steps:
