@@ -116,6 +116,11 @@ final class ProcessCommandTests: XCTestCase {
     }
 
     func testTerminate() async throws {
+        let info = ProcessInfo.processInfo
+        print("activeProcessorCount:", info.activeProcessorCount)
+        print("automaticTerminationSupportEnabled:", info.automaticTerminationSupportEnabled)
+        print(info.environment)
+
         let task = Task.detached {
             try await ProcessCommand.bash("sleep 2 && echo 'end'", successCode: nil).run()
         }
