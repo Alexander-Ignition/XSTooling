@@ -115,6 +115,14 @@ final class ProcessCommandTests: XCTestCase {
         }
     }
 
+    override func record(_ issue: XCTIssue) {
+        // ::error file={name},line={line},endLine={endLine},title={title}::{message}
+        if let location = issue.sourceCodeContext.location {
+            print("::error file=\(location.fileURL.absoluteString),line=\(location.lineNumber)::\(issue.compactDescription)")
+        }
+        super.record(issue)
+    }
+
     func testTerminate() async throws {
         let info = ProcessInfo.processInfo
         print("processorCount:", info.processorCount)
