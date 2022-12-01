@@ -115,13 +115,13 @@ final class ProcessCommandTests: XCTestCase {
         }
     }
 
-    override func record(_ issue: XCTIssue) {
+    #if os(Linux)
+    override func recordFailure(withDescription description: String, inFile filePath: String, atLine lineNumber: Int, expected: Bool) {
         // ::error file={name},line={line},endLine={endLine},title={title}::{message}
-        if let location = issue.sourceCodeContext.location {
-            print("::error file=\(location.fileURL.absoluteString),line=\(location.lineNumber)::\(issue.compactDescription)")
-        }
-        super.record(issue)
+        print("::error file=\(filePath),line=\(lineNumber)::\(description)")
+        super.recordFailure(withDescription: description, inFile: filePath, atLine: lineNumber, expected: expected)
     }
+    #endif
 
     func testTerminate() async throws {
         let info = ProcessInfo.processInfo
