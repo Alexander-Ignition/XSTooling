@@ -116,7 +116,7 @@ final class ProcessCommandTests: XCTestCase {
     }
 
     func testTerminate() async throws {
-        let task = Task {
+        let task = Task.detached {
             try await ProcessCommand.bash("sleep 2 && echo 'end'", successCode: nil).run()
         }
         Task {
