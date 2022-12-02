@@ -127,16 +127,17 @@ final class ProcessCommandTests: XCTestCase {
         let info = ProcessInfo.processInfo
         print("processorCount:", info.processorCount)
         print("activeProcessorCount:", info.activeProcessorCount)
-        print(info.environment)
 
         let task = Task.detached {
             try await ProcessCommand.bash("sleep 2 && echo 'end'", successCode: nil).run()
         }
-        print("cancel 1")
-        try await Task.sleep(nanoseconds: 1_000_000)
-        print("cancel 2")
-        task.cancel()
-        print("cancel 3")
+        Task.detached { @MainActor in
+            print("cancel 1")
+            try await Task.sleep(nanoseconds: 1_000_000)
+            print("cancel 2")
+            task.cancel()
+            print("cancel 3")
+        }
         let result = try await task.value
         XCTAssertEqual(result.code, 15, "The process was not terminated")
         XCTAssertEqual(result.string, "")
