@@ -27,5 +27,18 @@ class GHTestCase: XCTestCase {
         super.recordFailure(withDescription: description, inFile: filePath, atLine: lineNumber, expected: expected)
     }
 
+#else // os(Darwin)
+
+    override func record(_ issue: XCTIssue) {
+        if gitHub.isEnabled {
+            if let location = issue.sourceCodeContext.location {
+                gitHub.error(file: location.fileURL.absoluteString, line: location.lineNumber, message: issue.compactDescription)
+            } else {
+                gitHub.error(message: issue.compactDescription)
+            }
+        }
+        super.record(issue)
+    }
+
 #endif
 }
