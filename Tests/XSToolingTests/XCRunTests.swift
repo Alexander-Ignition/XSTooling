@@ -3,7 +3,7 @@ import XSTooling
 
 #if os(macOS)
 
-final class XCRunTests: XCTestCase {
+final class XCRunTests: GHTestCase {
     private var xcrun: XCRun!
     private var path: String!
 
@@ -35,4 +35,4 @@ final class XCRunTests: XCTestCase {
     }
 }
 
-#endif
+#endif // os(macOS)

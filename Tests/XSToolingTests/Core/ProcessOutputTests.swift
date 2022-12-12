@@ -1,7 +1,7 @@
 import XCTest
 import XSTooling
 
-final class ProcessOutputTests: XCTestCase {
+final class ProcessOutputTests: GHTestCase {
 
     private var output: ProcessOutput!
 

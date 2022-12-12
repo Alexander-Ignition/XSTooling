@@ -17,10 +17,10 @@ final class AsyncProcess {
     /// Runs the process with the current environment.
     func run() async throws {
         try await withTaskCancellationHandler {
-            _terminate()
-        } operation: {
             try Task.checkCancellation() // can be canceled before running
             try await _run()
+        } onCancel: {
+            _terminate()
         }
     }
 

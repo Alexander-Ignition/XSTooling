@@ -3,11 +3,11 @@ import XSTooling
 
 extension ProcessCommand {
     static func bash(_ command: String, successCode: Int32? = 0) -> ProcessCommand {
-        ProcessCommand(path: "/bin/bash", arguments: ["-c", command], successCode: successCode)
+        ProcessCommand(path: "/bin/bash", arguments: ["--verbose", "-c", command], successCode: successCode)
     }
 }
 
-final class ProcessCommandTests: XCTestCase {
+final class ProcessCommandTests: GHTestCase {
 
     func testInitWithDefaults() {
         let command = ProcessCommand(path: "/bin/cat")
@@ -115,28 +115,15 @@ final class ProcessCommandTests: XCTestCase {
         }
     }
 
-    #if os(Linux)
-    override func recordFailure(withDescription description: String, inFile filePath: String, atLine lineNumber: Int, expected: Bool) {
-        // ::error file={name},line={line},endLine={endLine},title={title}::{message}
-        print("::error file=\(filePath),line=\(lineNumber)::\(description)")
-        super.recordFailure(withDescription: description, inFile: filePath, atLine: lineNumber, expected: expected)
-    }
-    #endif
-
     func testTerminate() async throws {
-        let info = ProcessInfo.processInfo
-        print("processorCount:", info.processorCount)
-        print("activeProcessorCount:", info.activeProcessorCount)
+        try XCTSkipIf(isLinux)
 
-        let task = Task.detached {
+        let task = Task {
             try await ProcessCommand.bash("sleep 2 && echo 'end'", successCode: nil).run()
         }
-        Task.detached { @MainActor in
-            print("cancel 1")
+        Task {
             try await Task.sleep(nanoseconds: 1_000_000)
-            print("cancel 2")
             task.cancel()
-            print("cancel 3")
         }
         let result = try await task.value
         XCTAssertEqual(result.code, 15, "The process was not terminated")

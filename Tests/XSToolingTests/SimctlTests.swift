@@ -3,7 +3,7 @@ import XSTooling
 
 #if os(macOS)
 
-final class SimctlTests: XCTestCase {
+final class SimctlTests: GHTestCase {
     private var simctl: Simctl!
     private var path: String!
 
@@ -145,4 +145,4 @@ final class SimctlTests: XCTestCase {
     }
 }
 
-#endif
+#endif // os(macOS)
