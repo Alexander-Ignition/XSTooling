@@ -1,7 +1,7 @@
 import XCTest
 import XSTooling
 
-final class ProcessOutputErrorTests: XCTestCase {
+final class ProcessOutputErrorTests: GHTestCase {
 
     private var error: ProcessOutputError!
     private var result: ProcessOutput! {

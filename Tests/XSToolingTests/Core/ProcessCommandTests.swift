@@ -7,7 +7,7 @@ extension ProcessCommand {
     }
 }
 
-final class ProcessCommandTests: XCTestCase {
+final class ProcessCommandTests: GHTestCase {
 
     func testInitWithDefaults() {
         let command = ProcessCommand(path: "/bin/cat")
@@ -116,14 +116,17 @@ final class ProcessCommandTests: XCTestCase {
     }
 
     func testTerminate() async throws {
+        try XCTSkipIf(isLinux)
+
         let task = Task {
-            try await ProcessCommand.bash("sleep 3", successCode: nil).run()
+            try await ProcessCommand.bash("sleep 2 && echo 'end'", successCode: nil).run()
         }
         Task {
-            try await Task.sleep(nanoseconds: 2_000_000)
+            try await Task.sleep(nanoseconds: 1_000_000)
             task.cancel()
         }
         let result = try await task.value
-        XCTAssertEqual(result.code, 15, "The process was terminated")
+        XCTAssertEqual(result.code, 15, "The process was not terminated")
+        XCTAssertEqual(result.string, "")
     }
 }

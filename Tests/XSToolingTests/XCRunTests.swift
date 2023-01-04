@@ -1,7 +1,9 @@
 import XCTest
 import XSTooling
 
-final class XCRunTests: XCTestCase {
+#if os(macOS)
+
+final class XCRunTests: GHTestCase {
     private var xcrun: XCRun!
     private var path: String!
 
@@ -32,3 +34,5 @@ final class XCRunTests: XCTestCase {
         simctl.command.assert.equal(path: path, arguments: "simctl")
     }
 }
+
+#endif // os(macOS)
