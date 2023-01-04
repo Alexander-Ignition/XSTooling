@@ -16,11 +16,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Install xcaudit
-        uses: Alexander-Ignition/XCAudit@main
       - name: Build and test
         run: |
-          swift test --enable-code-coverage --disable-automatic-resolution 2>&1 | xcaudit
+          swift test --enable-code-coverage --disable-automatic-resolution
           ./.github/scripts/codecov.sh $(swift test --show-codecov-path) >> $GITHUB_STEP_SUMMARY
         shell: bash
   Linux:
