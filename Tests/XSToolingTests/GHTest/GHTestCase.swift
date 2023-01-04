@@ -21,8 +21,8 @@ class GHTestCase: XCTestCase {
 #if os(Linux)
 
     override func recordFailure(withDescription description: String, inFile filePath: String, atLine lineNumber: Int, expected: Bool) {
-        if gitHub.isEnabled {
-            gitHub.error(file: filePath, line: lineNumber, message: description)
+        if github.isEnabled {
+            github.error(file: filePath, line: lineNumber, message: description)
         }
         super.recordFailure(withDescription: description, inFile: filePath, atLine: lineNumber, expected: expected)
     }
