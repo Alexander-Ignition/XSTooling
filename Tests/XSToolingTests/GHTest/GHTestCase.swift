@@ -8,7 +8,7 @@
 import XCTest
 
 class GHTestCase: XCTestCase {
-    var gitHub: GHActions { .shared }
+    var github: GHActions { .shared }
 
     var isLinux: Bool {
 #if os(Linux)
@@ -30,11 +30,11 @@ class GHTestCase: XCTestCase {
 #else // os(Darwin)
 
     override func record(_ issue: XCTIssue) {
-        if gitHub.isEnabled {
+        if github.isEnabled {
             if let location = issue.sourceCodeContext.location {
-                gitHub.error(file: location.fileURL.absoluteString, line: location.lineNumber, message: issue.compactDescription)
+                github.error(file: location.fileURL.absoluteString, line: location.lineNumber, message: issue.compactDescription)
             } else {
-                gitHub.error(message: issue.compactDescription)
+                github.error(message: issue.compactDescription)
             }
         }
         super.record(issue)
