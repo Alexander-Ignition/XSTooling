@@ -17,10 +17,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Build and test
+        shell: bash
+        env: 
+          NSUnbufferedIO: YES
         run: |
           swift test --enable-code-coverage --disable-automatic-resolution
           ./.github/scripts/codecov.sh $(swift test --show-codecov-path) >> $GITHUB_STEP_SUMMARY
-        shell: bash
   Linux:
     name: Test Linux
     runs-on: ubuntu-latest
