@@ -3,7 +3,7 @@ import XSTooling
 
 extension ProcessCommand {
     static func bash(_ command: String, successCode: Int32? = 0) -> ProcessCommand {
-        ProcessCommand(path: "/bin/bash", arguments: ["--verbose", "-c", command], successCode: successCode)
+        ProcessCommand(path: "/bin/bash", arguments: ["-c", command], successCode: successCode)
     }
 }
 
