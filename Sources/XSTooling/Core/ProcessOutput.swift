@@ -1,7 +1,7 @@
 import Foundation
 
 /// Output of the process execution.
-public struct ProcessOutput: Hashable {
+public struct ProcessOutput: Hashable, @unchecked Sendable {
     /// Constants that specify the termination reason values that the system returns.
     public typealias TerminationReason = Process.TerminationReason
 

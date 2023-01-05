@@ -1,6 +1,6 @@
 import Foundation
 
-public struct ProcessCommand: Hashable {
+public struct ProcessCommand: Hashable, @unchecked Sendable {
     public static func find(_ name: String) -> ProcessCommand? {
         guard let string = ProcessInfo.processInfo.environment["PATH"] else {
             return nil

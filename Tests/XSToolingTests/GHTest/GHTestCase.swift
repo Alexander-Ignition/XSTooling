@@ -31,10 +31,11 @@ class GHTestCase: XCTestCase {
 
     override func record(_ issue: XCTIssue) {
         if github.isEnabled {
+            let message = "\(self.name): \(issue.compactDescription)"
             if let location = issue.sourceCodeContext.location {
-                github.error(file: location.fileURL.absoluteString, line: location.lineNumber, message: issue.compactDescription)
+                github.error(file: location.fileURL.absoluteString, line: location.lineNumber, message: message)
             } else {
-                github.error(message: issue.compactDescription)
+                github.error(message: message)
             }
         }
         super.record(issue)
