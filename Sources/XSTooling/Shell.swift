@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Shell: Equatable {
+public struct Shell: Equatable, Sendable {
     /// The default shell.
     public static var `default`: Shell {
         let path = ProcessInfo.processInfo.environment["SHELL"]

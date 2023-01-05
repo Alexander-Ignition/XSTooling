@@ -1,5 +1,5 @@
 /// Run or locate development tools and properties.
-public struct XCRun: Equatable {
+public struct XCRun: Equatable, Sendable {
     public var command: ProcessCommand
 
     public init(path: String = "/usr/bin/xcrun") {

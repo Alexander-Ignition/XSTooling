@@ -1,5 +1,5 @@
 /// Command line utility to control the Simulator.
-public struct Simctl: Equatable {
+public struct Simctl: Equatable, Sendable {
     public var command: ProcessCommand
 
     public init(command: ProcessCommand) {
@@ -14,7 +14,7 @@ public struct Simctl: Equatable {
         DeviceControl(simulator: self, udid: uuid)
     }
 
-    public struct DeviceControl {
+    public struct DeviceControl: Sendable {
         let simulator: Simctl
         let udid: String
 
@@ -38,7 +38,7 @@ public struct Simctl: Equatable {
         }
     }
 
-    public struct ApplicationControl {
+    public struct ApplicationControl: Sendable {
         let device: DeviceControl
         let bundleIdentifier: String
 
@@ -59,7 +59,7 @@ public struct Simctl: Equatable {
     }
 
     /// Installed app's container.
-    public struct Container {
+    public struct Container: Sendable {
         let application: ApplicationControl
 
         /// The .app bundle.
@@ -115,7 +115,7 @@ extension Simctl {
         return ListQuery(command: command.appending(arguments: arguments))
     }
 
-    public struct ListQuery<Format> {
+    public struct ListQuery<Format>: Sendable {
         public var command: ProcessCommand
 
         public func read() async throws -> ProcessOutput {
@@ -182,7 +182,7 @@ extension Simctl {
         }
     }
 
-    public struct DeviceInfo: Codable, Equatable {
+    public struct DeviceInfo: Codable, Equatable, Sendable {
         public let dataPath: String
         public let logPath: String
         public let udid: String
@@ -192,7 +192,7 @@ extension Simctl {
         public let name: String
     }
 
-    public struct DeviceType: Codable, Equatable {
+    public struct DeviceType: Codable, Equatable, Sendable {
         public let minRuntimeVersion: Int
         public let bundlePath: String
         public let maxRuntimeVersion: Int
