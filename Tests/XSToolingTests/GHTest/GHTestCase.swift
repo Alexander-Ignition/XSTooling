@@ -8,7 +8,7 @@
 import XCTest
 
 class GHTestCase: XCTestCase {
-    var github: GHActions { .shared }
+    var github: GHActions = .shared
 
     var isLinux: Bool {
 #if os(Linux)
@@ -16,6 +16,12 @@ class GHTestCase: XCTestCase {
 #else
         return false
 #endif
+    }
+
+    override func run() {
+        github.group(name)
+        super.run()
+        github.endGroup()
     }
 
 #if os(Linux)

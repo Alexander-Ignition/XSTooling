@@ -12,6 +12,14 @@ struct GHActions {
     func error(message: String) {
         print("::error::\(message)")
     }
+
+    func group(_ name: String) {
+        print("::group::\(name)")
+    }
+
+    func endGroup() {
+        print("::endgroup::")
+    }
 }
 
 extension GHActions {
