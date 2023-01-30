@@ -32,7 +32,7 @@ final class ProcessCommandTests: GHTestCase {
     }
 
     func testRunWithRedirection() async throws {
-        let command = ProcessCommand.bash("echo 'test'")
+        let command = ProcessCommand.bash("echo 'test fail'")
 
         let output = try await command.run(.output(.standardOutput).error(.standardOutput))
 
