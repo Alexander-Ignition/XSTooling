@@ -18,16 +18,6 @@ class GHTestCase: XCTestCase {
 #endif
     }
 
-    override class func setUp() {
-        GHActions.shared.group(defaultTestSuite.name)
-        super.setUp()
-    }
-
-    override class func tearDown() {
-        GHActions.shared.endGroup()
-        super.tearDown()
-    }
-
     override func run() {
         github.group(name)
         super.run()
