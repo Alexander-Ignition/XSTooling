@@ -25,5 +25,6 @@ let package = Package(
             resources: [
                 .copy("Fixtures")
             ]),
-    ]
+    ],
+    swiftLanguageModes: [.v6],
 )
