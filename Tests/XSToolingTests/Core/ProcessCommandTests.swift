@@ -29,7 +29,7 @@ final class ProcessCommandTests: GHTestCase {
     func testReadStandardError() async throws {
         let command = ProcessCommand.bash("echo 'hello'; echo 'world!' >&2;")
 
-        let output = try await command.read(standardError: .nullDevice)
+        let output = try await command.read(standardError: .standardOutput)
 
         XCTAssertEqual(output.string, "hello\nworld!")
     }
