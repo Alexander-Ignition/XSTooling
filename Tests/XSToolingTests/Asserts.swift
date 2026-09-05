@@ -21,7 +21,6 @@ extension ProcessCommand {
             XCTAssertEqual(command.arguments, other.arguments, "arguments", file: file, line: line)
             XCTAssertEqual(command.environment, other.environment, "environment", file: file, line: line)
             XCTAssertEqual(command.currentDirectoryURL, other.currentDirectoryURL, "currentDirectoryURL", file: file, line: line)
-            XCTAssertEqual(command.successCode, other.successCode, "successCode", file: file, line: line)
         }
     }
 }

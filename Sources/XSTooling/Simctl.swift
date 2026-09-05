@@ -121,11 +121,6 @@ extension Simctl {
         public func read() async throws -> ProcessOutput {
             try await command.read()
         }
-
-        @discardableResult
-        public func run(_ redirection: ProcessRedirection? = nil) async throws -> ProcessOutput {
-            try await command.run()
-        }
     }
 }
 
