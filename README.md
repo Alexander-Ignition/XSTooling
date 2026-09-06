@@ -2,7 +2,7 @@
 
 [![Test](https://github.com/Alexander-Ignition/XSTooling/actions/workflows/test.yml/badge.svg)](https://github.com/Alexander-Ignition/XSTooling/actions/workflows/test.yml)
 [![SPM compatible](https://img.shields.io/badge/spm-compatible-brightgreen.svg?style=flat)](https://swift.org/package-manager)
-[![Swift 5.3](https://img.shields.io/badge/swift-5.3-brightgreen.svg?style=flat)](https://developer.apple.com/swift)
+[![Swift 6.3](https://img.shields.io/badge/swift-6.3-brightgreen.svg?style=flat)](https://developer.apple.com/swift)
 [![GitHub license](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://github.com/Alexander-Ignition/XSTooling/blob/master/LICENSE)
 
 Xcode and Swift toolset
@@ -34,7 +34,7 @@ Finally, add `import XSTooling` to your source code.
 ```swift
 import XSTooling
 
-let sh = Shell.default
+let sh = Shell.current
 try await sh("swift build").run()
 ```
 
@@ -61,29 +61,16 @@ let url = URL(fileURLWithPath: "logs.txt", isDirectory: false)
 FileManager.default.createFile(atPath: url.path, contents: nil)
 let file = try FileHandle(forWritingTo: url)
 
-try await sh("swift build").run(.output(file).error(file))
+try await sh("swift build").run(standardOutput: file, standardError: file)
 ```
 
 `Shell` has predefined instances.
 
 ```swift
-Shell.default
+Shell.current
 Shell.sh
 Shell.bash
 Shell.zsh
-```
-
-Conceptually, a `Shell` is a wrapper over a `ProcessCommand`. 
-
-- `sh.command` contains common parameters for all commands.
-- `sh("ls")` each call to this method returned a copy of the `ProcessCommand` with additional arguments
-
-```swift
-let sh = Shell.default
-sh.command // ProcessCommand
-sh.command.environment // [String: String]?
-sh.command.currentDirectoryURL // URL?
-sh("ls") // ProcessCommand
 ```
 
 ## ProcessCommand
@@ -126,7 +113,7 @@ for info in devices where info.state == "Booted" {
     try await simulator.device(info.udid).shutdown.run()
 }
             
-let udid =  devices.first!.udid
+let udid = devices.first!.udid
 try await simulator.device(udid).boot.run()
 try await simulator.device(udid).app("com.example.app").launch.run()
 ```

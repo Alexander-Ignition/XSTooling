@@ -1,31 +1,33 @@
 import Foundation
 
 public struct Shell: Equatable, Sendable {
-    /// The default shell.
-    public static var `default`: Shell {
+    @TaskLocal
+    public static var current: Shell = {
         let path = ProcessInfo.processInfo.environment["SHELL"]
         return path.map { Shell(path: $0) } ?? bash
-    }
-    
+    }()
+
     /// POSIX-compliant command interpreter.
-    public static let sh = Shell(path: "/bin/sh")
+    public static var sh: Shell {
+        Shell(path: "/bin/sh")
+    }
 
     /// GNU Bourne-Again SHell.
-    public static let bash = Shell(path: "/bin/bash")
+    public static var bash: Shell {
+        Shell(path: "/bin/bash")
+    }
 
     /// The Z shell.
-    public static let zsh = Shell(path: "/bin/zsh")
+    public static var zsh: Shell {
+        Shell(path: "/bin/zsh")
+    }
 
-    /// Basic command.
-    ///
-    /// Contains common parameters for all commands in the tool.
-    public var command: ProcessCommand
+    public var path: String
+    public var arguments: [String]
 
-    /// A new shell.
-    ///
-    /// - Parameter path: executable file location.
-    public init(path: String) {
-        self.command = ProcessCommand(path: path)
+    public init(path: String, arguments: [String] = []) {
+        self.path = path
+        self.arguments = arguments
     }
 
     // MARK: - Options
@@ -36,7 +38,7 @@ public struct Shell: Equatable, Sendable {
 
     private func option(_ value: String) -> Shell {
         var shell = self
-        shell.command.arguments.append(value)
+        shell.arguments.append(value)
         return shell
     }
 
@@ -44,7 +46,7 @@ public struct Shell: Equatable, Sendable {
 
     /// Show version information for this instance of bash on the standard output and exit successfully.
     public var version: ProcessCommand {
-        command.appending(argument: "--version")
+        ProcessCommand(path: path, arguments: arguments).appending(argument: "--version")
     }
 
     public func callAsFunction(_ string: String) -> ProcessCommand {
@@ -52,11 +54,9 @@ public struct Shell: Equatable, Sendable {
     }
 
     public func command(string: String) -> ProcessCommand {
-        command.appending(arguments: "-c", string)
-    }
-
-    /// Locate a program file in the user's path.
-    public func which(_ name: String) -> ProcessCommand {
-        command(string: "which \(name)")
+        var arguments = self.arguments
+        arguments.append("-c")
+        arguments.append(string)
+        return ProcessCommand(path: path, arguments: arguments)
     }
 }

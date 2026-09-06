@@ -1,30 +1,36 @@
 /// Run or locate development tools and properties.
 public struct XCRun: Equatable, Sendable {
-    public var command: ProcessCommand
+    @TaskLocal
+    public static var current = XCRun(path: "/usr/bin/xcrun")
 
-    public init(path: String = "/usr/bin/xcrun") {
-        self.command = ProcessCommand(path: path)
-    }
-
-    public init(command: ProcessCommand) {
-        self.command = command
-    }
+    public var path: String
 
     /// Show the xcrun version.
     public var version: ProcessCommand {
-        command.appending(argument: "--version")
+        command(arguments: ["--version"])
+    }
+
+    /// A new simulator control.
+    public var simctl: Simctl {
+        get async throws {
+            let path = try await find("simctl")
+            return Simctl(path: path)
+        }
     }
 
     /// Only find and return the tool path.
     ///
     /// - Parameter tool: The tool name.
     /// - Returns: The tool path.
-    public func find(_ tool: String) -> ProcessCommand {
-        command.appending(arguments: "--find", tool)
+    public func find(_ tool: String) async throws -> String {
+        try await command(arguments: ["--find", tool]).read().string(strippingNewline: true)
     }
 
-    /// A new simulator control.
-    public var simctl: Simctl {
-        Simctl(command: command.appending(argument: "simctl"))
+    public func callAsFunction(_ arguments: String...) -> ProcessCommand {
+        command(arguments: arguments)
+    }
+
+    public func command(arguments: [String]) -> ProcessCommand {
+        ProcessCommand(path: path, arguments: arguments)
     }
 }

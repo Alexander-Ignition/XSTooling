@@ -13,7 +13,7 @@ final class ShellTests: GHTestCase {
 
     func testSh() async throws {
         shell = Shell.sh
-        shell.command.assert.equal(path: "/bin/sh")
+        XCTAssertEqual(shell.path, "/bin/sh")
 
         let string = try await shell("echo 'hello world'").read().string
         XCTAssertEqual(string, "hello world")
@@ -21,7 +21,7 @@ final class ShellTests: GHTestCase {
 
     func testBash() async throws {
         shell = Shell.bash
-        shell.command.assert.equal(path: "/bin/bash")
+        XCTAssertEqual(shell.path, "/bin/bash")
 
         let string = try await shell("echo 'hello world'").read().string
         XCTAssertEqual(string, "hello world")
@@ -31,45 +31,42 @@ final class ShellTests: GHTestCase {
         try XCTSkipIf(isLinux)
         
         shell = Shell.zsh
-        shell.command.assert.equal(path: "/bin/zsh")
+        XCTAssertEqual(shell.path, "/bin/zsh")
 
         let string = try await shell("echo 'hello world'").read().string
         XCTAssertEqual(string, "hello world")
     }
 
     func testVerbose() {
-        let command = shell.verbose.command
-
-        command.assert.equal(path: path, arguments: "--verbose")
+        XCTAssertEqual(shell.verbose, Shell(path: path, arguments: ["--verbose"]))
     }
 
     func testLogin() {
-        let command = shell.login.command
-
-        command.assert.equal(path: path, arguments: "--login")
+        XCTAssertEqual(shell.login, Shell(path: path, arguments: ["--login"]))
     }
 
     func testVersion() {
-        let command = shell.version
-
-        command.assert.equal(path: path, arguments: "--version")
+        XCTAssertEqual(shell.version, ProcessCommand(path: path, arguments: ["--version"]))
     }
 
     func testVerboseLoginVersion() {
         let command = shell.verbose.login.version
 
-        command.assert.equal(path: path, arguments: "--verbose", "--login", "--version")
-    }
+        let expected = ProcessCommand(
+            path: path,
+            arguments: ["--verbose", "--login", "--version"]
+        )
+        XCTAssertEqual(command, expected)
 
-    func testWhich() {
-        let command = shell.which("ls")
-
-        command.assert.equal(path: path, arguments: "-c", "which ls")
     }
 
     func testCallAsFunction() {
         let command = shell("xcrun xcodebuild -version")
 
-        command.assert.equal(path: path, arguments: "-c", "xcrun xcodebuild -version")
+        let expected = ProcessCommand(
+            path: path,
+            arguments: ["-c", "xcrun xcodebuild -version"]
+        )
+        XCTAssertEqual(command, expected)
     }
 }

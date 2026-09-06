@@ -3,7 +3,7 @@ import XSTooling
 
 extension ProcessCommand {
     static func bash(_ command: String, successCode: Int32? = 0) -> ProcessCommand {
-        ProcessCommand(path: "/bin/bash", arguments: ["-c", command], successCode: successCode)
+        ProcessCommand(path: "/bin/bash", arguments: ["-c", command])
     }
 }
 
@@ -16,7 +16,6 @@ final class ProcessCommandTests: GHTestCase {
         XCTAssertEqual(command.arguments, [])
         XCTAssertNil(command.environment)
         XCTAssertNil(command.currentDirectoryURL)
-        XCTAssertEqual(command.successCode, 0)
     }
 
     func testRead() async throws {
@@ -24,23 +23,21 @@ final class ProcessCommandTests: GHTestCase {
 
         let output = try await command.read()
 
-        XCTAssertEqual(output.code, 0)
-        XCTAssertEqual(output.reason, .exit)
-        XCTAssertEqual(output.command, command)
-        XCTAssertEqual(output.standardOutput, Data("hello\n".utf8))
-        XCTAssertEqual(output.standardError, Data())
+        XCTAssertEqual(output.data, Data("hello\n".utf8))
+    }
+
+    func testReadStandardError() async throws {
+        let command = ProcessCommand.bash("echo 'hello'; echo 'world!' >&2;")
+
+        let output = try await command.read(standardError: .standardOutput)
+
+        XCTAssertEqual(output.string, "hello\nworld!")
     }
 
     func testRunWithRedirection() async throws {
         let command = ProcessCommand.bash("echo 'test'")
 
-        let output = try await command.run(.output(.standardOutput).error(.standardOutput))
-
-        XCTAssertEqual(output.code, 0)
-        XCTAssertEqual(output.reason, .exit)
-        XCTAssertEqual(output.command, command)
-        XCTAssertEqual(output.standardOutput, Data())
-        XCTAssertEqual(output.standardError, Data())
+        try await command.run(standardOutput: .standardOutput, standardError: .standardOutput)
     }
 
     func testEnvironment() async throws {
@@ -67,25 +64,29 @@ final class ProcessCommandTests: GHTestCase {
 
     func testSuccessCodeCheck() async {
         let command = ProcessCommand.bash("exit 1")
-        let output = ProcessOutput(code: 1, reason: .exit, command: command)
-        let expectedError = ProcessOutputError(output: output)
+        let expectedError = ProcessError(
+            executableURL: command.executableURL,
+            arguments: command.arguments,
+            terminationStatus: 1,
+            terminationReason: .exit
+        )
         do {
-            let output = try await command.run()
-            XCTFail("The exit code has not been checked: \(output)")
-        } catch let error as ProcessOutputError {
+            try await command.run()
+            XCTFail("The exit code has not been checked")
+        } catch let error as ProcessError {
             XCTAssertEqual(error, expectedError)
         } catch {
             XCTFail("Unexpected error: \(error)")
         }
     }
 
-    func testReadWithError() async throws {
+    func testRunWithError() async throws {
         let command = ProcessCommand(path: "/usr/local/bin/not/found")
         do {
-            let output = try await command.run()
-            XCTFail("\(output)")
+            try await command.run()
+            XCTFail("The exit code has not been checked")
         } catch {
-            XCTAssertFalse(error is ProcessOutputError)
+            XCTAssertFalse(error is ProcessError)
         }
     }
 
@@ -95,8 +96,8 @@ final class ProcessCommandTests: GHTestCase {
         }
         task.cancel()
         do {
-            let result = try await task.value
-            XCTFail("Task not cancelled. Exit code: \(result.code)")
+            let output = try await task.value
+            XCTFail("Task not cancelled. Output: \(output.string)")
         } catch {
             XCTAssert(error is CancellationError, "Unexpected error: \(error)")
         }
@@ -108,8 +109,8 @@ final class ProcessCommandTests: GHTestCase {
         }
         task.cancel()
         do {
-            let result = try await task.value
-            XCTFail("Task not cancelled. Exit code: \(result.code)")
+            _ = try await task.value
+            XCTFail("Task not cancelled")
         } catch {
             XCTAssert(error is CancellationError, "Unexpected error: \(error)")
         }
@@ -125,8 +126,10 @@ final class ProcessCommandTests: GHTestCase {
             try await Task.sleep(nanoseconds: 1_000_000)
             task.cancel()
         }
-        let result = try await task.value
-        XCTAssertEqual(result.code, 15, "The process was not terminated")
-        XCTAssertEqual(result.string, "")
+        do {
+            _ = try await task.value
+        } catch {
+            XCTAssert(error is CancellationError, "Unexpected error: \(error)")
+        }
     }
 }
