@@ -8,16 +8,22 @@ public struct Shell: Equatable, Sendable {
     }()
 
     /// POSIX-compliant command interpreter.
-    public static var sh: Shell { Shell(path: "/bin/sh") }
+    public static var sh: Shell {
+        Shell(path: "/bin/sh")
+    }
 
     /// GNU Bourne-Again SHell.
-    public static var bash: Shell { Shell(path: "/bin/bash") }
+    public static var bash: Shell {
+        Shell(path: "/bin/bash")
+    }
 
     /// The Z shell.
-    public static var zsh: Shell { Shell(path: "/bin/zsh") }
+    public static var zsh: Shell {
+        Shell(path: "/bin/zsh")
+    }
 
     public var path: String
-    public var arguments: [String] = []
+    public var arguments: [String]
 
     public init(path: String, arguments: [String] = []) {
         self.path = path
