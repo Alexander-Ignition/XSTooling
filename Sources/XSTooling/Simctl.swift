@@ -1,9 +1,13 @@
 /// Command line utility to control the Simulator.
 public struct Simctl: Equatable, Sendable {
-    public var command: ProcessCommand
+    public var path: String
 
-    public init(command: ProcessCommand) {
-        self.command = command
+    public func callAsFunction(_ arguments: String...) -> ProcessCommand {
+        command(arguments: arguments)
+    }
+
+    public func command(arguments: [String]) -> ProcessCommand {
+        ProcessCommand(path: path, arguments: arguments)
     }
 
     public var booted: DeviceControl {
@@ -20,17 +24,17 @@ public struct Simctl: Equatable, Sendable {
 
         /// Boot a device or device pair.
         public var boot: ProcessCommand {
-            simulator.command.appending(arguments: "boot", udid)
+            simulator("boot", udid)
         }
 
         /// Shutdown a device.
         public var shutdown: ProcessCommand {
-            simulator.command.appending(arguments: "shutdown", udid)
+            simulator("shutdown", udid)
         }
 
         /// Open a URL in a device.
         public func open(url: String) -> ProcessCommand {
-            simulator.command.appending(arguments: "openurl", udid, url)
+            simulator("openurl", udid, url)
         }
 
         public func app(_ appBundleIdentifier: String) -> ApplicationControl {
@@ -49,12 +53,12 @@ public struct Simctl: Equatable, Sendable {
 
         /// Launch an application by identifier on a device.
         public var launch: ProcessCommand {
-            device.simulator.command.appending(arguments: "launch", device.udid, bundleIdentifier)
+            device.simulator("launch", device.udid, bundleIdentifier)
         }
 
         /// Terminate an application by identifier on a device.
         public var terminate: ProcessCommand {
-            device.simulator.command.appending(arguments: "terminate", device.udid, bundleIdentifier)
+            device.simulator("terminate", device.udid, bundleIdentifier)
         }
     }
 
@@ -63,26 +67,32 @@ public struct Simctl: Equatable, Sendable {
         let application: ApplicationControl
 
         /// The .app bundle.
-        public var app: ProcessCommand { _path("app") }
+        public var app: ProcessCommand {
+            container("app")
+        }
 
         /// The application's data container.
-        public var data: ProcessCommand { _path("data") }
+        public var data: ProcessCommand {
+            container("data")
+        }
 
         /// The App Group containers.
-        public var groups: ProcessCommand { _path("groups") }
+        public var groups: ProcessCommand {
+            container("groups")
+        }
 
         /// A specific App Group container.
         public func group(_ identifier: String) -> ProcessCommand {
-            _path(identifier)
+            container(identifier)
         }
 
-        private func _path(_ container: String) -> ProcessCommand {
+        private func container(_ name: String) -> ProcessCommand {
             // Usage: simctl get_app_container <device> <app bundle identifier> [<container>]
-            application.device.simulator.command.appending(arguments:
+            application.device.simulator(
                 "get_app_container",
                 application.device.udid,
                 application.bundleIdentifier,
-                container)
+                name)
         }
     }
 }
@@ -92,7 +102,7 @@ public struct Simctl: Equatable, Sendable {
 extension Simctl {
     /// List available devices, device types, runtimes, and device pairs.
     public var list: ListQuery<Void> {
-        ListQuery(command: command.appending(argument: "list"))
+        ListQuery(command: command(arguments: ["list"]))
     }
 
     /// List available devices, device types, runtimes, and device pairs.
@@ -112,7 +122,7 @@ extension Simctl {
         if available {
             arguments.append("available")
         }
-        return ListQuery(command: command.appending(arguments: arguments))
+        return ListQuery(command: command(arguments: arguments))
     }
 
     public struct ListQuery<Format>: Sendable {
