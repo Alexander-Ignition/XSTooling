@@ -52,12 +52,21 @@ final class ShellTests: GHTestCase {
     func testVerboseLoginVersion() {
         let command = shell.verbose.login.version
 
-        command.assert.equal(path: path, arguments: "--verbose", "--login", "--version")
+        let expected = ProcessCommand(
+            path: path,
+            arguments: ["--verbose", "--login", "--version"]
+        )
+        XCTAssertEqual(command, expected)
+
     }
 
     func testCallAsFunction() {
         let command = shell("xcrun xcodebuild -version")
 
-        command.assert.equal(path: path, arguments: "-c", "xcrun xcodebuild -version")
+        let expected = ProcessCommand(
+            path: path,
+            arguments: ["-c", "xcrun xcodebuild -version"]
+        )
+        XCTAssertEqual(command, expected)
     }
 }
