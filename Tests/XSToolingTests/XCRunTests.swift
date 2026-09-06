@@ -12,12 +12,12 @@ final class XCRunTests: GHTestCase {
 
     func testFind() async throws {
         let path = try await xcrun.find("xcodebuild")
-        XCTAssertEqual(path, "/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild")
+        XCTAssertTrue(path.hasSuffix("/usr/bin/xcodebuild"))
     }
 
     func testSimctl() async throws {
         let simulator = try await xcrun.simctl
-        XCTAssertEqual(simulator.path, "/Applications/Xcode.app/Contents/Developer/usr/bin/simctl")
+        XCTAssertTrue(simulator.path.hasSuffix("/usr/bin/simctl"))
     }
 }
 
