@@ -6,15 +6,14 @@ import PackageDescription
 let package = Package(
     name: "XSTooling",
     platforms: [
-        .macOS(.v10_15),
+        .macOS(.v10_15)
     ],
     products: [
         .library(
             name: "XSTooling",
-            targets: ["XSTooling"]),
+            targets: ["XSTooling"])
     ],
-    dependencies: [
-    ],
+    dependencies: [],
     targets: [
         .target(
             name: "XSTooling",

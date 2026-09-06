@@ -14,7 +14,7 @@ public struct ProcessCommand: Hashable, Sendable {
 
     /// The receiver’s executable.
     public var executableURL: URL
-    
+
     /// The command arguments that the system uses to launch the executable.
     public var arguments: [String]
 

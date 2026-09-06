@@ -15,7 +15,7 @@ jobs:
     runs-on: macOS-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
       - name: Build and test
         shell: bash
         env:
@@ -29,5 +29,13 @@ jobs:
     container:
       image: swift:6.3.3
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - run: swift test
+  Lint:
+    runs-on: macOS-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: swift-format lint
+        run: make lint 2>&1 | .github/scripts/format.swift
+        shell: bash

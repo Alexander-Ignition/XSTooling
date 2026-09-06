@@ -29,7 +29,7 @@ final class ShellTests: GHTestCase {
 
     func testZsh() async throws {
         try XCTSkipIf(isLinux)
-        
+
         shell = Shell.zsh
         XCTAssertEqual(shell.path, "/bin/zsh")
 
