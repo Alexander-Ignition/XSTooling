@@ -1,6 +1,6 @@
 //
 //  GHTestCase.swift
-//  
+//
 //
 //  Created by Alexander Ignatiev on 12.12.2022.
 //
@@ -11,23 +11,25 @@ class GHTestCase: XCTestCase {
     var github: GHActions { .shared }
 
     var isLinux: Bool {
-#if os(Linux)
+        #if os(Linux)
         return true
-#else
+        #else
         return false
-#endif
+        #endif
     }
 
-#if os(Linux)
+    #if os(Linux)
 
-    override func recordFailure(withDescription description: String, inFile filePath: String, atLine lineNumber: Int, expected: Bool) {
+    override func recordFailure(
+        withDescription description: String, inFile filePath: String, atLine lineNumber: Int, expected: Bool
+    ) {
         if github.isEnabled {
             github.error(file: filePath, line: lineNumber, message: description)
         }
         super.recordFailure(withDescription: description, inFile: filePath, atLine: lineNumber, expected: expected)
     }
 
-#else // os(Darwin)
+    #else // os(Darwin)
 
     override func record(_ issue: XCTIssue) {
         if github.isEnabled {
@@ -41,5 +43,5 @@ class GHTestCase: XCTestCase {
         super.record(issue)
     }
 
-#endif
+    #endif
 }
