@@ -1,72 +1,87 @@
-import XCTest
+import Testing
+import Foundation
 import XSTooling
 
-final class ShellTests: GHTestCase {
-    private var shell: Shell!
-    private var path: String!
+@Suite(.gitHub)
+struct ShellTests {
 
-    override func setUp() {
-        super.setUp()
-        path = "/bin/bash/\(name)"
-        shell = Shell(path: path)
-    }
-
-    func testSh() async throws {
-        shell = Shell.sh
-        XCTAssertEqual(shell.path, "/bin/sh")
+    @Test func sh() async throws {
+        let shell = Shell.sh
+        #expect(shell == Shell(path: "/bin/sh", arguments: []))
 
         let string = try await shell("echo 'hello world'").read().string
-        XCTAssertEqual(string, "hello world")
+        #expect(string == "hello world")
     }
 
-    func testBash() async throws {
-        shell = Shell.bash
-        XCTAssertEqual(shell.path, "/bin/bash")
+    @Test func bash() async throws {
+        let shell = Shell.bash
+        #expect(shell == Shell(path: "/bin/bash", arguments: []))
 
         let string = try await shell("echo 'hello world'").read().string
-        XCTAssertEqual(string, "hello world")
+        #expect(string == "hello world")
     }
 
-    func testZsh() async throws {
-        try XCTSkipIf(isLinux)
+    @Test func zsh() async throws {
+        let shell = Shell.zsh
+        #expect(shell == Shell(path: "/bin/zsh", arguments: []))
 
-        shell = Shell.zsh
-        XCTAssertEqual(shell.path, "/bin/zsh")
-
+        #if os(macOS)
         let string = try await shell("echo 'hello world'").read().string
-        XCTAssertEqual(string, "hello world")
+        #expect(string == "hello world")
+        #endif
     }
 
-    func testVerbose() {
-        XCTAssertEqual(shell.verbose, Shell(path: path, arguments: ["--verbose"]))
+    @Test func current() throws {
+        var shell = Shell.current
+        #expect(shell.arguments == [])
+
+        let expected = try #require(ProcessInfo.processInfo.environment["SHELL"])
+        #if os(macOS)
+        #expect(shell.path == expected)
+        #elseif os(Linux)
+        #expect(shell.path == expected)
+        #endif
+
+        shell.path = "/bin/sh"
+        shell.arguments = ["--verbose"]
+        Shell.$current.withValue(shell) {
+            let shell = Shell.current
+            #expect(shell.path == "/bin/sh")
+            #expect(shell.arguments == ["--verbose"])
+        }
     }
 
-    func testLogin() {
-        XCTAssertEqual(shell.login, Shell(path: path, arguments: ["--login"]))
-    }
+    @Test func arguments() {
+        var shell = Shell.zsh
+        shell.arguments = ["--login", "--verbose"]
 
-    func testVersion() {
-        XCTAssertEqual(shell.version, ProcessCommand(path: path, arguments: ["--version"]))
-    }
-
-    func testVerboseLoginVersion() {
-        let command = shell.verbose.login.version
-
+        let command = shell.command(string: "echo 'hello world'")
         let expected = ProcessCommand(
-            path: path,
-            arguments: ["--verbose", "--login", "--version"]
+            path: "/bin/zsh",
+            arguments: ["--login", "--verbose", "-c", "echo 'hello world'"]
         )
-        XCTAssertEqual(command, expected)
-
+        #expect(command == expected)
     }
 
-    func testCallAsFunction() {
+    @Test func version() {
+        let shell = Shell.sh
+
+        let command = shell.version
+        let expected = ProcessCommand(
+            path: "/bin/sh",
+            arguments: ["--version"]
+        )
+        #expect(command == expected)
+    }
+
+    @Test func callAsFunction() {
+        let shell = Shell.bash
         let command = shell("xcrun xcodebuild -version")
 
         let expected = ProcessCommand(
-            path: path,
+            path: "/bin/bash",
             arguments: ["-c", "xcrun xcodebuild -version"]
         )
-        XCTAssertEqual(command, expected)
+        #expect(command == expected)
     }
 }
