@@ -78,56 +78,30 @@ struct ProcessCommandTests {
         #expect(output.string == "b")
     }
 
-    @Test func `exit status check`() async {
-        let command = bash("exit 2")
-        let error = await #expect(throws: ProcessError.self) {
-            try await command.run()
-        }
-        let expected = ProcessError(
-            executableURL: command.executableURL,
-            arguments: command.arguments,
-            terminationStatus: 2,
-            terminationReason: .exit
-        )
-        #expect(error == expected)
-    }
-
-    @Test func `run with error`() async throws {
+    @Test func `run with error`() async {
         let error = await #expect(throws: CocoaError.self) {
             try await ProcessCommand(path: "/usr/local/bin/not/found").run()
         }
         #expect(error?.code == .fileNoSuchFile)
     }
 
-    //    func testCancelRead() async throws {
-    //        let task = Task(priority: .low) {
-    //            try await ProcessCommand.bash("sleep 3").read()
-    //        }
-    //        task.cancel()
-    //        do {
-    //            let output = try await task.value
-    //            XCTFail("Task not cancelled. Output: \(output.string)")
-    //        } catch {
-    //            XCTAssert(error is CancellationError, "Unexpected error: \(error)")
-    //        }
-    //    }
-    //
-    //    func testCancelWithRedirection() async throws {
-    //        let task = Task(priority: .low) {
-    //            try await ProcessCommand.bash("sleep 2").run()
-    //        }
-    //        task.cancel()
-    //        do {
-    //            _ = try await task.value
-    //            XCTFail("Task not cancelled")
-    //        } catch {
-    //            XCTAssert(error is CancellationError, "Unexpected error: \(error)")
-    //        }
-    //    }
+    @Test func `exit status check`() async {
+        let command = bash("exit 2")
+        let error = ProcessError(
+            executableURL: command.executableURL,
+            arguments: command.arguments,
+            terminationStatus: 2,
+            terminationReason: .exit
+        )
+        await #expect(throws: error) {
+            try await command.run()
+        }
+    }
 
-    @Test func cancel() async {
+    @Test func termination() async {
+        let command = bash("sleep 2 && echo 'end'")
         let task = Task {
-            try await bash("sleep 2 && echo 'end'").read().string
+            try await command.read().string
         }
         let task2 = Task {
             try await Task.sleep(for: .seconds(1))
@@ -136,6 +110,23 @@ struct ProcessCommandTests {
         defer {
             task2.cancel()
         }
+        let error = ProcessError(
+            executableURL: command.executableURL,
+            arguments: command.arguments,
+            terminationStatus: 15,
+            terminationReason: .uncaughtSignal
+        )
+        await #expect(throws: error) {
+            try await task.value
+        }
+    }
+
+    @Test func cancel() async throws {
+        let task = Task(priority: .low) {
+            await Task.yield()
+            try await bash("sleep 3").run()
+        }
+        task.cancel()
         await #expect(throws: CancellationError.self) {
             try await task.value
         }
