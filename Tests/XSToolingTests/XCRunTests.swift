@@ -1,23 +1,32 @@
 #if os(macOS)
 
-import XCTest
+import Testing
 import XSTooling
 
-final class XCRunTests: GHTestCase {
+@Suite(.gitHub)
+struct XCRunTests {
     private let xcrun = XCRun.current
 
-    func testExecute() async throws {
-        try await xcrun("xcodebuild", "-version").run()
+    @Test func run() async {
+        await #expect(throws: Never.self) {
+            try await xcrun("xcodebuild", "-version").run(standardOutput: .nullDevice)
+        }
     }
 
-    func testFind() async throws {
-        let path = try await xcrun.find("xcodebuild")
-        XCTAssertTrue(path.hasSuffix("/usr/bin/xcodebuild"))
+    @Test func version() {
+        let command = xcrun.version
+        let expected = ProcessCommand(path: "/usr/bin/xcrun", arguments: ["--version"])
+        #expect(command == expected)
     }
 
-    func testSimctl() async throws {
+    @Test func simulator() async throws {
         let simulator = try await xcrun.simctl
-        XCTAssertTrue(simulator.path.hasSuffix("/usr/bin/simctl"))
+        #expect(simulator.path.hasSuffix("/usr/bin/simctl"))
+    }
+
+    @Test func find() async throws {
+        let path = try await xcrun.find("xcodebuild")
+        #expect(path.hasSuffix("/usr/bin/xcodebuild"))
     }
 }
 
