@@ -35,11 +35,11 @@ struct ShellTests {
         var shell = Shell.current
         #expect(shell.arguments == [])
 
-        let expected = try #require(ProcessInfo.processInfo.environment["SHELL"])
         #if os(macOS)
+        let expected = try #require(ProcessInfo.processInfo.environment["SHELL"])
         #expect(shell.path == expected)
         #elseif os(Linux)
-        #expect(shell.path == expected)
+        #expect(shell.path == "/bin/bash")
         #endif
 
         shell.path = "/bin/sh"
