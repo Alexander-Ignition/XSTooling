@@ -104,7 +104,7 @@ public struct ProcessCommand: Hashable, Sendable {
         process.executableURL = executableURL
         process.currentDirectoryURL = currentDirectoryURL
         process.arguments = arguments
-        if let environment = environment {
+        if let environment {
             process.environment = environment
         }
         if let standardOutput {
@@ -189,7 +189,6 @@ extension Process {
                 self.terminate() // crash if not running
             }
         }
-        try Task.checkCancellation()
     }
 }
 
@@ -198,10 +197,10 @@ extension Process {
 extension FileHandle {
     fileprivate func stream() -> AsyncStream<Data> {
         AsyncStream<Data> { continuation in
+            continuation.onTermination = { [weak self] _ in
+                self?.readabilityHandler = nil // stop
+            }
             self.readabilityHandler = { fileHandle in
-                continuation.onTermination = { _ in
-                    fileHandle.readabilityHandler = nil // stop
-                }
                 let data = fileHandle.availableData
                 if data.isEmpty {
                     fileHandle.readabilityHandler = nil // stop
