@@ -130,7 +130,7 @@ struct ProcessCommandTests {
             try await bash("sleep 2 && echo 'end'").read().string
         }
         let task2 = Task {
-            try await Task.sleep(nanoseconds: NSEC_PER_SEC * 1)
+            try await Task.sleep(for: .seconds(1))
             task.cancel()
         }
         defer {
