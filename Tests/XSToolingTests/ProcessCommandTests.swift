@@ -20,7 +20,13 @@ struct ProcessCommandTests {
 
     @Test func `find executable in PATH`() {
         let command = ProcessCommand.find("ls")
+        #if os(macOS)
         #expect(command == ProcessCommand(path: "/bin/ls"))
+        #elseif os(Linux)
+        #expect(command == ProcessCommand(path: "/usr/bin/ls"))
+        #else
+        #expect(command == ProcessCommand(path: "/bin/ls"))
+        #endif
     }
 
     @Test func `not found executable in PATH`() {
