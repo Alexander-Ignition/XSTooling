@@ -3,7 +3,7 @@ import Testing
 
 @testable import XSTooling
 
-@Suite(.gitHub)
+@Suite(.timeLimit(.minutes(1)), .gitHub)
 struct SimctlTests {
     private let simctl: Simctl
     private let path: String

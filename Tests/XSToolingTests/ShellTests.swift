@@ -2,7 +2,7 @@ import Foundation
 import Testing
 import XSTooling
 
-@Suite(.gitHub)
+@Suite(.timeLimit(.minutes(1)), .gitHub)
 struct ShellTests {
 
     @Test func sh() async throws {

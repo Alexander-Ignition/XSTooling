@@ -3,7 +3,7 @@
 import Testing
 import XSTooling
 
-@Suite(.gitHub)
+@Suite(.timeLimit(.minutes(1)), .gitHub)
 struct XCRunTests {
     private let xcrun = XCRun.current
 
