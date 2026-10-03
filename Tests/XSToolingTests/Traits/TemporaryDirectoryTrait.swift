@@ -18,7 +18,7 @@ struct TemporaryDirectoryTrait: TestTrait, SuiteTrait, TestScoping {
     func provideScope(
         for test: Test,
         testCase: Test.Case?,
-        performing function: @Sendable () async throws -> Void
+        performing function: @concurrent @Sendable () async throws -> Void
     ) async throws {
         guard Test.temporaryDirectory == nil else {
             return try await function()

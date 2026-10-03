@@ -66,7 +66,6 @@ extension Process {
                 self.terminate() // crash if not running
             }
         }
-        try Task.checkCancellation()
     }
 }
 
