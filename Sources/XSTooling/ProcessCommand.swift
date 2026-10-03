@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 public struct ProcessCommand: Hashable, Sendable {
     public static func find(_ name: String) -> ProcessCommand? {

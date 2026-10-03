@@ -3,6 +3,14 @@
 
 import PackageDescription
 
+let swiftSettings: [SwiftSetting] = [
+    .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+    .enableUpcomingFeature("InferIsolatedConformances"),
+    .enableUpcomingFeature("ExistentialAny"),
+    .enableUpcomingFeature("MemberImportVisibility"),
+    .enableUpcomingFeature("InternalImportsByDefault"),
+]
+
 let package = Package(
     name: "XSTooling",
     platforms: [
@@ -17,13 +25,15 @@ let package = Package(
     targets: [
         .target(
             name: "XSTooling",
-            dependencies: []),
+            dependencies: [],
+            swiftSettings: swiftSettings),
         .testTarget(
             name: "XSToolingTests",
             dependencies: ["XSTooling"],
             resources: [
                 .copy("Fixtures")
-            ]),
+            ],
+            swiftSettings: swiftSettings),
     ],
     swiftLanguageModes: [.v6],
 )
