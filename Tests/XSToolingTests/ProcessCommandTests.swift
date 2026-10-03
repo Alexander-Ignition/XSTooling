@@ -2,6 +2,10 @@ import Foundation
 import Testing
 import XSTooling
 
+#if EnableSubprocess
+import Subprocess
+#endif
+
 @Suite(.timeLimit(.minutes(1)), .serialized, .gitHub)
 struct ProcessCommandTests {
 
@@ -64,6 +68,13 @@ struct ProcessCommandTests {
         #expect(string == "Start\nDone!\n")
     }
 
+    @Test func `redirect stdout and stderr to /dev/null`() async throws {
+        let command = bash("echo 'Start'; echo 'Done!' >&2;")
+        await #expect(throws: Never.self) {
+            try await command.run(standardOutput: .nullDevice, standardError: .nullDevice)
+        }
+    }
+
     @Test func `environment with custom variable`() async throws {
         var command = bash("echo $TEST_VALUE")
         command.environment = ["TEST_VALUE": "a"]
@@ -85,10 +96,16 @@ struct ProcessCommandTests {
     }
 
     @Test func `run with error`() async {
+        #if EnableSubprocess
+        await #expect(throws: SubprocessError.self) {
+            try await ProcessCommand(path: "/usr/local/bin/not/found").run()
+        }
+        #else
         let error = await #expect(throws: CocoaError.self) {
             try await ProcessCommand(path: "/usr/local/bin/not/found").run()
         }
         #expect(error?.code == .fileNoSuchFile)
+        #endif
     }
 
     @Test func `exit status check`() async {
@@ -116,10 +133,15 @@ struct ProcessCommandTests {
         defer {
             task2.cancel()
         }
+        #if EnableSubprocess
+        let terminationStatus: Int32 = 9
+        #else
+        let terminationStatus: Int32 = 15
+        #endif
         let error = ProcessError(
             executableURL: command.executableURL,
             arguments: command.arguments,
-            terminationStatus: 15,
+            terminationStatus: terminationStatus,
             terminationReason: .uncaughtSignal
         )
         await #expect(throws: error) {

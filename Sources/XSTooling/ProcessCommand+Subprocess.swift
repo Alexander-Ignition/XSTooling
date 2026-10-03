@@ -68,7 +68,6 @@ extension ProcessCommand {
     }
 
     private func check(terminationStatus: TerminationStatus) throws {
-        try Task.checkCancellation()
         if terminationStatus.isSuccess {
             return
         }

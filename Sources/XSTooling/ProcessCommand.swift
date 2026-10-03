@@ -72,14 +72,16 @@ public struct ProcessCommand: Hashable, Sendable {
     // MARK: - Running
 
     public func read(standardError: FileHandle? = nil) async throws -> ProcessOutput {
+        try Task.checkCancellation()
         #if EnableSubprocess
-        try await readSubprocess(standardError: standardError, limit: Int.max)
+        return try await readSubprocess(standardError: standardError, limit: Int.max)
         #else
-        try await readProcess(standardError: standardError)
+        return try await readProcess(standardError: standardError)
         #endif
     }
 
     public func run(standardOutput: FileHandle? = nil, standardError: FileHandle? = nil) async throws {
+        try Task.checkCancellation()
         #if EnableSubprocess
         try await runSubprocess(standardOutput: standardOutput, standardError: standardError)
         #else
