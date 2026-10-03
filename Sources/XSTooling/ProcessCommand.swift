@@ -72,48 +72,19 @@ public struct ProcessCommand: Hashable, Sendable {
     // MARK: - Running
 
     public func read(standardError: FileHandle? = nil) async throws -> ProcessOutput {
-        let pipe = Pipe()
-        let standardError: Any? = (standardError == FileHandle.standardOutput) ? pipe : standardError
-        async let output = pipe.fileHandleForReading.stream().reduce(into: Data()) { $0.append($1) }
-        try await runProcess(standardOutput: pipe, standardError: standardError)
-        let data = await output
-        return ProcessOutput(data: data)
+        #if EnableSubprocess
+        try await readSubprocess(standardError: standardError, limit: Int.max)
+        #else
+        try await readProcess(standardError: standardError)
+        #endif
     }
 
     public func run(standardOutput: FileHandle? = nil, standardError: FileHandle? = nil) async throws {
+        #if EnableSubprocess
+        try await runSubprocess(standardOutput: standardOutput, standardError: standardError)
+        #else
         try await runProcess(standardOutput: standardOutput, standardError: standardError)
-    }
-
-    // MARK: - Private
-
-    private func runProcess(standardOutput: Any?, standardError: Any?) async throws {
-        let process = try makeProcess(standardOutput: standardOutput, standardError: standardError)
-        try await process.execute()
-        if process.terminationStatus != 0 {
-            throw ProcessError(
-                executableURL: executableURL,
-                arguments: arguments,
-                terminationStatus: process.terminationStatus,
-                terminationReason: process.terminationReason
-            )
-        }
-    }
-
-    private func makeProcess(standardOutput: Any?, standardError: Any?) throws -> Process {
-        let process = Process()
-        process.executableURL = executableURL
-        process.currentDirectoryURL = currentDirectoryURL
-        process.arguments = arguments
-        if let environment = environment {
-            process.environment = environment
-        }
-        if let standardOutput {
-            process.standardOutput = standardOutput
-        }
-        if let standardError {
-            process.standardError = standardError
-        }
-        return process
+        #endif
     }
 }
 
