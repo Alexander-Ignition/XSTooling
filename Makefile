@@ -1,11 +1,18 @@
-.PHONY: clean test lint format
+.PHONY: clean test test-linux lint format
+
+clean:
+	swift package clean
+
+# MARK: - test
 
 test:
 	swift test --enable-code-coverage
 	./.github/scripts/codecov.sh $(shell swift test --show-codecov-path)
 
-clean:
-	swift package clean
+CONTAINER ?= container
+
+test-linux:
+	$(CONTAINER) run --rm -t --init -v "$(PWD):/src" -w /src swift:latest swift test
 
 # MARK: - format
 
