@@ -25,11 +25,11 @@ let package = Package(
         .trait(
             name: "EnableSubprocess",
             description: "Enable swift-subprocess dependency"
-        ),
+        )
         // .default(enabledTraits: ["EnableSubprocess"]), // Local Development
     ],
     dependencies: [
-        .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "1.0.0"),
+        .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "1.0.0")
     ],
     targets: [
         .target(
@@ -39,7 +39,7 @@ let package = Package(
                     name: "Subprocess",
                     package: "swift-subprocess",
                     condition: .when(traits: ["EnableSubprocess"])
-                ),
+                )
             ],
             swiftSettings: swiftSettings,
         ),
