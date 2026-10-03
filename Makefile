@@ -12,7 +12,7 @@ test:
 CONTAINER ?= container
 
 test-linux:
-	$(CONTAINER) run --rm -t --init -v "$(PWD):/src" -w /src swift:latest swift test
+	$(CONTAINER) run --rm -t --init -v "$(PWD):/src" -w /src swift:latest swift test --traits EnableSubprocess
 
 # MARK: - format
 

@@ -14,19 +14,35 @@ let swiftSettings: [SwiftSetting] = [
 let package = Package(
     name: "XSTooling",
     platforms: [
-        .macOS(.v10_15)
+        .macOS(.v13)
     ],
     products: [
         .library(
             name: "XSTooling",
             targets: ["XSTooling"])
     ],
-    dependencies: [],
+    traits: [
+        .trait(
+            name: "EnableSubprocess",
+            description: "Enable swift-subprocess dependency"
+        )
+        // .default(enabledTraits: ["EnableSubprocess"]), // Local Development
+    ],
+    dependencies: [
+        .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "1.0.0")
+    ],
     targets: [
         .target(
             name: "XSTooling",
-            dependencies: [],
-            swiftSettings: swiftSettings),
+            dependencies: [
+                .product(
+                    name: "Subprocess",
+                    package: "swift-subprocess",
+                    condition: .when(traits: ["EnableSubprocess"])
+                )
+            ],
+            swiftSettings: swiftSettings,
+        ),
         .testTarget(
             name: "XSToolingTests",
             dependencies: ["XSTooling"],
