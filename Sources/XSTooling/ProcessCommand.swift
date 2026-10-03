@@ -198,13 +198,12 @@ extension Process {
 extension FileHandle {
     fileprivate func stream() -> AsyncStream<Data> {
         AsyncStream<Data> { continuation in
+            continuation.onTermination = { [weak self] _ in
+                self?.readabilityHandler = nil // stop
+            }
             self.readabilityHandler = { fileHandle in
-                continuation.onTermination = { _ in
-                    fileHandle.readabilityHandler = nil // stop
-                }
                 let data = fileHandle.availableData
                 if data.isEmpty {
-                    fileHandle.readabilityHandler = nil // stop
                     continuation.finish()
                 } else {
                     continuation.yield(data)
