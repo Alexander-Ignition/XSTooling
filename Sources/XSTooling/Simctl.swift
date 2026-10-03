@@ -163,7 +163,7 @@ extension Simctl {
             deviceTypes = []
         }
 
-        public init(from decoder: Decoder) throws {
+        public init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             self.devices = try container.decodeIfPresent([String: [DeviceInfo]].self, forKey: .devices) ?? [:]
             self.deviceTypes = try container.decodeIfPresent([DeviceType].self, forKey: .deviceTypes) ?? []
