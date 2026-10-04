@@ -72,14 +72,16 @@ public struct ProcessCommand: Hashable, Sendable {
     // MARK: - Running
 
     public func read(standardError: FileHandle? = nil) async throws -> ProcessOutput {
+        try Task.checkCancellation()
         #if EnableSubprocess
-        try await readSubprocess(standardError: standardError, limit: Int.max)
+        return try await readSubprocess(standardError: standardError, limit: Int.max)
         #else
-        try await readProcess(standardError: standardError)
+        return try await readProcess(standardError: standardError)
         #endif
     }
 
     public func run(standardOutput: FileHandle? = nil, standardError: FileHandle? = nil) async throws {
+        try Task.checkCancellation()
         #if EnableSubprocess
         try await runSubprocess(standardOutput: standardOutput, standardError: standardError)
         #else
@@ -133,53 +135,5 @@ public struct ProcessError: Error, Equatable {
         self.arguments = arguments
         self.terminationStatus = terminationStatus
         self.terminationReason = terminationReason
-    }
-}
-
-// MARK: - Process
-
-extension Process {
-    fileprivate func execute() async throws {
-        try Task.checkCancellation()
-
-        try await withTaskCancellationHandler {
-            try await withCheckedThrowingContinuation { continuation in
-                self.terminationHandler = { process in
-                    process.terminationHandler = nil
-                    continuation.resume()
-                }
-                do {
-                    try self.run()
-                } catch {
-                    self.terminationHandler = nil
-                    continuation.resume(throwing: error)
-                }
-            }
-        } onCancel: { // can be canceled without starting
-            if self.isRunning {
-                self.terminate() // crash if not running
-            }
-        }
-        try Task.checkCancellation()
-    }
-}
-
-// MARK: - FileHandle + AsyncStream
-
-extension FileHandle {
-    fileprivate func stream() -> AsyncStream<Data> {
-        AsyncStream<Data> { continuation in
-            continuation.onTermination = { [weak self] _ in
-                self?.readabilityHandler = nil // stop
-            }
-            self.readabilityHandler = { fileHandle in
-                let data = fileHandle.availableData
-                if data.isEmpty {
-                    continuation.finish()
-                } else {
-                    continuation.yield(data)
-                }
-            }
-        }
     }
 }

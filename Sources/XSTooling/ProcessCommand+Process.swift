@@ -46,8 +46,6 @@ extension ProcessCommand {
 
 extension Process {
     fileprivate func perform() async throws {
-        try Task.checkCancellation()
-
         try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
                 self.terminationHandler = { process in
@@ -66,7 +64,6 @@ extension Process {
                 self.terminate() // crash if not running
             }
         }
-        try Task.checkCancellation()
     }
 }
 

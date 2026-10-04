@@ -103,8 +103,8 @@ By analogy with Shell, you can make other wrappers over the `ProcessCommand`
 Using simctl, you can search for iPhone 12, turn it on and launch the application.
 
 ```swift
-let xcrun = XCRun()
-let simulator = xcrun.simctl
+let xcrun = XCRun.current
+let simulator = try await xcrun.simctl
 
 let list = try await simulator.list(.devices, "iPhone 12", available: true).json.decode()
 let devices = list.devices.flatMap { $0.value }

@@ -30,20 +30,6 @@ public struct Shell: Equatable, Sendable {
         self.arguments = arguments
     }
 
-    // MARK: - Options
-
-    public var verbose: Shell { option("--verbose") }
-
-    public var login: Shell { option("--login") }
-
-    private func option(_ value: String) -> Shell {
-        var shell = self
-        shell.arguments.append(value)
-        return shell
-    }
-
-    // MARK: - Commands
-
     /// Show version information for this instance of bash on the standard output and exit successfully.
     public var version: ProcessCommand {
         ProcessCommand(path: path, arguments: arguments).appending(argument: "--version")
