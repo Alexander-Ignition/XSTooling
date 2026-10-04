@@ -35,36 +35,44 @@ extension ProcessCommand {
     }
 
     func readSubprocess(standardError: FileHandle?, limit: Int) async throws -> ProcessOutput {
-        let values: (terminationStatus: TerminationStatus, standardOutput: Data)
-        if standardError == FileHandle.standardOutput {
-            let result = try await Subprocess::run(
-                self.subprocessConfiguration,
-                output: .data(limit: limit),
-                error: .combinedWithOutput,
-            )
-            values = (result.terminationStatus, result.standardOutput)
-        } else {
-            let result = try await Subprocess::run(
-                self.subprocessConfiguration,
-                output: .data(limit: limit),
-                error: standardError?.fileDescriptorOutput ?? .currentStandardError,
-            )
-            values = (result.terminationStatus, result.standardOutput)
-        }
-        try check(terminationStatus: values.terminationStatus)
-        return ProcessOutput(data: values.standardOutput)
+        let config = self.subprocessConfiguration
+        let output = DataOutput.data(limit: limit)
+        lazy var error = standardError?.fileDescriptorOutput ?? .currentStandardError
+
+        let (terminationStatus, standardOutput) =
+            switch standardError {
+            case .standardOutput:
+                try await Subprocess::run(config, output: output, error: .combinedWithOutput).dataOutput
+            case .nullDevice:
+                try await Subprocess::run(config, output: output, error: .discarded).dataOutput
+            default:
+                try await Subprocess::run(config, output: output, error: error).dataOutput
+            }
+        try check(terminationStatus: terminationStatus)
+        return ProcessOutput(data: standardOutput)
     }
 
     func runSubprocess(
         standardOutput: FileHandle?,
         standardError: FileHandle?,
     ) async throws {
-        let result = try await Subprocess::run(
-            self.subprocessConfiguration,
-            output: standardOutput?.fileDescriptorOutput ?? .currentStandardOutput,
-            error: standardError?.fileDescriptorOutput ?? .currentStandardError,
-        )
-        try check(terminationStatus: result.terminationStatus)
+
+        let config = self.subprocessConfiguration
+        lazy var output = standardOutput?.fileDescriptorOutput ?? .currentStandardOutput
+        lazy var error = standardError?.fileDescriptorOutput ?? .currentStandardError
+
+        let status =
+            switch (standardOutput, standardError) {
+            case (.nullDevice, .nullDevice):
+                try await Subprocess::run(config, output: .discarded, error: .discarded).terminationStatus
+            case (_, .nullDevice):
+                try await Subprocess::run(config, output: output, error: .discarded).terminationStatus
+            case (.nullDevice, _):
+                try await Subprocess::run(config, output: .discarded, error: error).terminationStatus
+            default:
+                try await Subprocess::run(config, output: output, error: error).terminationStatus
+            }
+        try check(terminationStatus: status)
     }
 
     private func check(terminationStatus: TerminationStatus) throws {
@@ -93,6 +101,12 @@ extension TerminationStatus {
         case .exited: .exit
         case .signaled: .uncaughtSignal
         }
+    }
+}
+
+extension ExecutionResult where Output == DataOutput {
+    fileprivate var dataOutput: (TerminationStatus, Data) {
+        (terminationStatus, standardOutput)
     }
 }
 
